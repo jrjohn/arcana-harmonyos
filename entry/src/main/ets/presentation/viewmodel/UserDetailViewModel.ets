@@ -39,6 +39,10 @@ export interface NavigateBackInput {
   type: 'NavigateBack';
 }
 
+export interface UserUpdatedInput {
+  type: 'UserUpdated';
+}
+
 export type UserDetailInput =
   | LoadUserInput
   | RefreshUserInput
@@ -46,7 +50,8 @@ export type UserDetailInput =
   | DeleteUserInput
   | ConfirmDeleteInput
   | CancelDeleteInput
-  | NavigateBackInput;
+  | NavigateBackInput
+  | UserUpdatedInput;
 
 // ===== State =====
 
@@ -208,6 +213,10 @@ export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDeta
       case 'NavigateBack':
         this.navigateBack();
         break;
+
+      case 'UserUpdated':
+        this.handleUserUpdated();
+        break;
     }
   }
 
@@ -313,9 +322,9 @@ export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDeta
   }
 
   /**
-   * Called when user is updated externally
+   * Handles user updated notification (via Input event)
    */
-  async onUserUpdated(): Promise<void> {
+  private async handleUserUpdated(): Promise<void> {
     await this.loadUser(this._state.userId);
   }
 }

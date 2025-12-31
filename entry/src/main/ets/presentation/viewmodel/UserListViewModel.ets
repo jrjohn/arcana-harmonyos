@@ -56,6 +56,15 @@ export interface RetryLoadInput extends BaseInput {
   type: 'RetryLoad';
 }
 
+export interface ConfirmDeleteUserInput extends BaseInput {
+  type: 'ConfirmDeleteUser';
+  userId: number;
+}
+
+export interface UserChangedInput extends BaseInput {
+  type: 'UserChanged';
+}
+
 export type UserListInput =
   | LoadUsersInput
   | LoadNextPageInput
@@ -66,7 +75,9 @@ export type UserListInput =
   | CreateUserInput
   | DeleteUserInput
   | TriggerSyncInput
-  | RetryLoadInput;
+  | RetryLoadInput
+  | ConfirmDeleteUserInput
+  | UserChangedInput;
 
 // ===== State =====
 
@@ -304,6 +315,14 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
       case 'RetryLoad':
         this.loadUsers(true);
         break;
+
+      case 'ConfirmDeleteUser':
+        this.handleDeleteUser(input.userId);
+        break;
+
+      case 'UserChanged':
+        this.handleUserChanged();
+        break;
     }
   }
 
@@ -468,9 +487,11 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
   }
 
   /**
-   * Called when a user is deleted (from outside)
+   * Handles confirmed user deletion (via Input event)
    */
-  async onUserDeleted(userId: number): Promise<void> {
+  private async handleDeleteUser(userId: number): Promise<void> {
+    this.analytics.trackEvent('delete_user_confirmed', AnalyticsProps.of('userId', userId));
+
     // Remove from local list
     const updatedUsers: User[] = [];
     for (const u of this._state.users) {
@@ -490,9 +511,9 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
   }
 
   /**
-   * Called when a user is created or updated (from outside)
+   * Handles user created or updated notification (via Input event)
    */
-  async onUserChanged(): Promise<void> {
+  private async handleUserChanged(): Promise<void> {
     // Refresh the list
     await this.loadUsers(true);
   }

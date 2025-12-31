@@ -149,8 +149,8 @@ struct UserListPage {
         ]
       }).then((result) => {
         if (result.index === 1) {
-          // User confirmed delete
-          this.viewModel?.onUserDeleted(userId);
+          // User confirmed delete - send through Input/Output pattern
+          this.sendEvent({ type: 'ConfirmDeleteUser', userId: userId });
         }
       }).catch((err: Error) => {
         console.error(`showDialog error: ${err.message}`);
