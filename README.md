@@ -5,7 +5,8 @@ A production-grade HarmonyOS 5 (NEXT) application demonstrating **Clean Architec
 ## Requirements
 
 - **DevEco Studio**: 6.0.1.260 or later
-- **HarmonyOS SDK**: API 12 (5.0.0)
+- **HarmonyOS SDK**: API 21 (6.0.1) - Target SDK
+- **Minimum SDK**: API 12 (5.0.0) - Compatible SDK
 - **HarmonyOS Device**: NEXT compatible device or emulator
 
 ## Overview
@@ -119,8 +120,146 @@ entry/src/main/ets/
 | Architecture | Clean Architecture + MVVM |
 | Network | @kit.NetworkKit (HTTP) |
 | Storage | @kit.ArkData (Preferences) |
-| Navigation | @kit.ArkUI (router) |
+| Navigation | UIContext Router API |
+| Dialogs/Toasts | UIContext PromptAction API |
 | DI | InversifyJS-style IoC Container |
+
+## UIContext API Patterns
+
+This project uses the modern **UIContext-based APIs** instead of deprecated global APIs. This ensures compatibility with HarmonyOS API 21+ and follows current best practices.
+
+### Navigation
+
+```typescript
+// Deprecated (avoid)
+import { router } from '@kit.ArkUI';
+router.pushUrl({ url: 'pages/UserDetailPage', params: { userId: 123 } });
+router.back();
+
+// Modern (use this)
+this.getUIContext().getRouter().pushUrl({
+  url: 'pages/UserDetailPage',
+  params: { userId: 123 }
+});
+this.getUIContext().getRouter().back();
+```
+
+### Dialogs and Toasts
+
+```typescript
+// Deprecated (avoid)
+import { promptAction } from '@kit.ArkUI';
+promptAction.showToast({ message: 'Success!', duration: 2000 });
+promptAction.showDialog({ title: 'Confirm', message: '...', buttons: [...] });
+
+// Modern (use this)
+this.getUIContext().getPromptAction().showToast({
+  message: 'Success!',
+  duration: 2000
+});
+
+this.getUIContext().getPromptAction().showDialog({
+  title: 'Confirm',
+  message: 'Are you sure?',
+  buttons: [
+    { text: 'Cancel', color: '#6B7280' },
+    { text: 'OK', color: '#7C3AED' }
+  ]
+}).then((result) => {
+  if (result.index === 1) {
+    // User clicked OK
+  }
+});
+```
+
+### Getting Route Parameters
+
+```typescript
+// In aboutToAppear() lifecycle
+aboutToAppear(): void {
+  let params: RouterParams | undefined;
+  try {
+    params = this.getUIContext().getRouter().getParams() as RouterParams;
+  } catch (err) {
+    Logger.e(TAG, `Failed to get params: ${err}`);
+  }
+  const userId = params?.userId ?? 0;
+}
+```
+
+## ArkTS Strict Mode Patterns
+
+This project uses **ArkTS strict mode** which enforces stricter type checking. Here are key patterns used:
+
+### Avoiding Untyped Object Literals
+
+```typescript
+// Problem: Untyped object literals not allowed
+const props: Record<string, ESObject> = { key: 'value' }; // Error!
+
+// Solution: Use Map-based classes
+export class AnalyticsProps {
+  private data: Map<string, string | number | boolean> = new Map();
+
+  set(key: string, value: string | number | boolean): AnalyticsProps {
+    this.data.set(key, value);
+    return this;
+  }
+
+  static of(key: string, value: string | number | boolean): AnalyticsProps {
+    return new AnalyticsProps().set(key, value);
+  }
+}
+
+// Usage
+analytics.trackEvent('user_created', AnalyticsProps.of('userId', 123).set('source', 'form'));
+```
+
+### Stack Component Alignment
+
+```typescript
+// Deprecated pattern
+Stack() { ... }
+  .justifyContent(FlexAlign.Center)
+  .alignItems(VerticalAlign.Center)
+
+// Correct pattern - use constructor parameter
+Stack({ alignContent: Alignment.Center }) {
+  // content
+}
+```
+
+### Exception Handling
+
+```typescript
+// All potentially throwing functions must be wrapped in try-catch
+private async getAllUsersInternal(): Promise<LocalUser[]> {
+  try {
+    const prefs = await this.getPreferences();
+    const usersJson = await prefs.get(USERS_KEY, '[]') as string;
+    return JSON.parse(usersJson) as LocalUser[];
+  } catch (err) {
+    console.error(`getAllUsersInternal error: ${err}`);
+    return [];
+  }
+}
+```
+
+### Timer Functions
+
+```typescript
+// Type casting required for timer IDs
+private syncIntervalId: number = -1;
+
+this.syncIntervalId = setInterval(() => {
+  this.performSync();
+}, 30000) as number;
+
+// Clear with proper check
+if (this.syncIntervalId !== -1) {
+  clearInterval(this.syncIntervalId);
+}
+```
 
 ## Dependency Injection
 
@@ -421,7 +560,8 @@ Endpoints:
 ### Prerequisites
 
 - DevEco Studio 6.0.1.260 or later
-- HarmonyOS SDK API 12 (5.0.0)
+- HarmonyOS SDK API 21 (6.0.1) - Target
+- HarmonyOS SDK API 12 (5.0.0) - Minimum
 - HarmonyOS NEXT device or emulator
 
 ### Setup
@@ -442,6 +582,24 @@ Endpoints:
    - `AppScope/resources/base/media/app_icon.png`
 
 5. Run on device or emulator
+
+### Command-Line Build
+
+To build from the command line:
+
+```bash
+export DEVECO_SDK_HOME="/Applications/DevEco-Studio.app/Contents"
+
+$DEVECO_SDK_HOME/tools/node/bin/node \
+  $DEVECO_SDK_HOME/tools/hvigor/bin/hvigorw.js \
+  clean --mode module -p product=default assembleHap \
+  --analyze=normal --parallel --incremental --daemon
+```
+
+The HAP file will be generated at:
+```
+entry/build/default/outputs/default/entry-default-signed.hap
+```
 
 ## Feature Comparison with Android
 
