@@ -141,8 +141,9 @@ export class BackgroundScheduler implements IBackgroundScheduler {
   async schedulePeriodicWork(config: WorkConfig): Promise<boolean> {
     try {
       const workInfo = this.createWorkInfo(config, true);
+      const workId = workInfo.workId;
 
-      const workId = await workScheduler.startWork(workInfo);
+      await workScheduler.startWork(workInfo);
       this.workIds.set(config.type, workId);
 
       this.log(`Scheduled periodic work: ${config.type} (interval: ${config.intervalMinutes}min)`);
@@ -156,13 +157,12 @@ export class BackgroundScheduler implements IBackgroundScheduler {
   async scheduleOneTimeWork(type: WorkType, delayMinutes: number): Promise<boolean> {
     try {
       const config = DEFAULT_WORK_CONFIGS[type];
+      const generatedWorkId = this.generateWorkId(type);
       const workInfo: workScheduler.WorkInfo = {
-        workId: this.generateWorkId(type),
+        workId: generatedWorkId,
         bundleName: 'com.arcana.harmonyos',
-        abilityName: 'BackgroundWorkAbility',
-        networkType: config.requireNetwork
-          ? workScheduler.NetworkType.NETWORK_TYPE_ANY
-          : workScheduler.NetworkType.NETWORK_TYPE_NOT_REQUIRED,
+        abilityName: 'SyncWorker',
+        networkType: workScheduler.NetworkType.NETWORK_TYPE_ANY,
         isCharging: config.requireCharging,
         isPersisted: false,
         isRepeat: false,
@@ -171,8 +171,8 @@ export class BackgroundScheduler implements IBackgroundScheduler {
         }
       };
 
-      const workId = await workScheduler.startWork(workInfo);
-      this.workIds.set(type, workId);
+      await workScheduler.startWork(workInfo);
+      this.workIds.set(type, generatedWorkId);
 
       this.log(`Scheduled one-time work: ${type} (delay: ${delayMinutes}min)`);
       return true;
@@ -186,7 +186,12 @@ export class BackgroundScheduler implements IBackgroundScheduler {
     try {
       const workId = this.workIds.get(type);
       if (workId !== undefined) {
-        await workScheduler.stopWork(workId);
+        const workInfo: workScheduler.WorkInfo = {
+          workId: workId,
+          bundleName: 'com.arcana.harmonyos',
+          abilityName: 'SyncWorker'
+        };
+        await workScheduler.stopWork(workInfo);
         this.workIds.delete(type);
         this.log(`Cancelled work: ${type}`);
         return true;
@@ -281,22 +286,20 @@ export class BackgroundScheduler implements IBackgroundScheduler {
   // ===== Private Methods =====
 
   private createWorkInfo(config: WorkConfig, isRepeat: boolean): workScheduler.WorkInfo {
-    return {
+    const workInfo: workScheduler.WorkInfo = {
       workId: this.generateWorkId(config.type),
       bundleName: 'com.arcana.harmonyos',
-      abilityName: 'BackgroundWorkAbility',
-      networkType: config.requireNetwork
-        ? workScheduler.NetworkType.NETWORK_TYPE_ANY
-        : workScheduler.NetworkType.NETWORK_TYPE_NOT_REQUIRED,
+      abilityName: 'SyncWorker',
+      networkType: workScheduler.NetworkType.NETWORK_TYPE_ANY,
       isCharging: config.requireCharging,
       isPersisted: config.persist,
       isRepeat: isRepeat,
       repeatCycleTime: config.intervalMinutes * 60 * 1000, // Convert to ms
-      repeatCount: workScheduler.REPEAT_COUNT_INFINITE,
       parameters: {
         workType: config.type
       }
     };
+    return workInfo;
   }
 
   private generateWorkId(type: WorkType): number {

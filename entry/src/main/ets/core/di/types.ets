@@ -4,10 +4,10 @@
  */
 
 /**
- * Service identifier - can be a symbol or string
- * Symbols are preferred for type safety
+ * Service identifier - uses string for ArkTS compatibility
+ * ArkTS does not support Symbol() API
  */
-export type ServiceIdentifier<T = unknown> = symbol | string;
+export type ServiceIdentifier<T = Object> = string;
 
 /**
  * Binding scope determines how instances are managed
@@ -108,7 +108,7 @@ export interface IBindingTo<T> {
   /**
    * Binds to a class/constructor
    */
-  to(constructor: new (...args: ESObject[]) => T): IBindingInWhen<T>;
+  to(constructor: Object): IBindingInWhen<T>;
 
   /**
    * Binds to a constant value

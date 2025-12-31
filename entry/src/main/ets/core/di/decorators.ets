@@ -67,7 +67,7 @@ export function injectable(): ClassDecorator {
  * ```
  */
 export function inject(serviceIdentifier: ServiceIdentifier): ParameterDecorator {
-  return (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number): void => {
+  const decorator = (target: Object, propertyKey: string | undefined, parameterIndex: number): void => {
     // Get the constructor (target is prototype for instance methods)
     const constructor = propertyKey === undefined ? target : target.constructor;
 
@@ -85,6 +85,7 @@ export function inject(serviceIdentifier: ServiceIdentifier): ParameterDecorator
     metadata.dependencies[parameterIndex] = serviceIdentifier;
     metadata.parameterIndices.push(parameterIndex);
   };
+  return decorator as ParameterDecorator;
 }
 
 /**
@@ -101,7 +102,7 @@ export function inject(serviceIdentifier: ServiceIdentifier): ParameterDecorator
  * ```
  */
 export function injectProperty(serviceIdentifier: ServiceIdentifier): PropertyDecorator {
-  return (target: Object, propertyKey: string | symbol): void => {
+  const decorator = (target: Object, propertyKey: string): void => {
     const constructor = target.constructor;
 
     // Get or create property injection metadata
@@ -116,6 +117,7 @@ export function injectProperty(serviceIdentifier: ServiceIdentifier): PropertyDe
       identifier: serviceIdentifier
     });
   };
+  return decorator as PropertyDecorator;
 }
 
 /**
@@ -131,10 +133,11 @@ export function injectProperty(serviceIdentifier: ServiceIdentifier): PropertyDe
  * ```
  */
 export function named(name: string): ParameterDecorator {
-  return (_target: Object, _propertyKey: string | symbol | undefined, _parameterIndex: number): void => {
+  const decorator = (_target: Object, _propertyKey: string | undefined, _parameterIndex: number): void => {
     // Store named binding info - can be extended for named resolution
     // For now, this is a marker decorator
   };
+  return decorator as ParameterDecorator;
 }
 
 /**
@@ -151,7 +154,7 @@ export function named(name: string): ParameterDecorator {
 const optionalParams = new Map<Object, Set<number>>();
 
 export function optional(): ParameterDecorator {
-  return (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number): void => {
+  const decorator = (target: Object, propertyKey: string | undefined, parameterIndex: number): void => {
     const constructor = propertyKey === undefined ? target : target.constructor;
 
     let optionalSet = optionalParams.get(constructor);
@@ -161,6 +164,7 @@ export function optional(): ParameterDecorator {
     }
     optionalSet.add(parameterIndex);
   };
+  return decorator as ParameterDecorator;
 }
 
 /**
@@ -177,7 +181,7 @@ export function optional(): ParameterDecorator {
 const multiInjectParams = new Map<Object, Map<number, ServiceIdentifier>>();
 
 export function multiInject(serviceIdentifier: ServiceIdentifier): ParameterDecorator {
-  return (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number): void => {
+  const decorator = (target: Object, propertyKey: string | undefined, parameterIndex: number): void => {
     const constructor = propertyKey === undefined ? target : target.constructor;
 
     let multiMap = multiInjectParams.get(constructor);
@@ -187,6 +191,7 @@ export function multiInject(serviceIdentifier: ServiceIdentifier): ParameterDeco
     }
     multiMap.set(parameterIndex, serviceIdentifier);
   };
+  return decorator as ParameterDecorator;
 }
 
 /**
@@ -207,9 +212,10 @@ export function multiInject(serviceIdentifier: ServiceIdentifier): ParameterDeco
 const postConstructMethods = new Map<Object, string>();
 
 export function postConstruct(): MethodDecorator {
-  return (target: Object, propertyKey: string | symbol, _descriptor: PropertyDescriptor): void => {
+  const decorator = (target: Object, propertyKey: string, _descriptor: PropertyDescriptor): void => {
     postConstructMethods.set(target.constructor, String(propertyKey));
   };
+  return decorator as MethodDecorator;
 }
 
 /**
@@ -230,9 +236,10 @@ export function postConstruct(): MethodDecorator {
 const preDestroyMethods = new Map<Object, string>();
 
 export function preDestroy(): MethodDecorator {
-  return (target: Object, propertyKey: string | symbol, _descriptor: PropertyDescriptor): void => {
+  const decorator = (target: Object, propertyKey: string, _descriptor: PropertyDescriptor): void => {
     preDestroyMethods.set(target.constructor, String(propertyKey));
   };
+  return decorator as MethodDecorator;
 }
 
 // ===== Metadata Access Functions =====

@@ -4,10 +4,9 @@
  */
 
 import { http } from '@kit.NetworkKit';
-import { injectable, inject, preDestroy } from '../../core/di/decorators';
+import { injectable, preDestroy } from '../../core/di/decorators';
 import { IUserApiService, ILogger } from '../../core/di/interfaces';
-import { TYPES } from '../../core/di/tokens';
-import { ApiConfig, HttpStatus } from './ApiConfig';
+import { ApiConfig, ApiEndpoints, ApiHeaders, HttpStatus } from './ApiConfig';
 import {
   PaginatedUsersResponse,
   SingleUserResponse,
@@ -41,7 +40,7 @@ export class UserApiServiceImpl implements IUserApiService {
   }
 
   async getUsers(page: number = 1, perPage: number = 6): Promise<Result<PaginatedUsers, AppError>> {
-    const url = `${ApiConfig.BASE_URL}${ApiConfig.Endpoints.USERS}?page=${page}&per_page=${perPage}`;
+    const url = `${ApiConfig.BASE_URL}${ApiEndpoints.USERS}?page=${page}&per_page=${perPage}`;
     this.log(`Fetching users from: ${url}`);
 
     try {
@@ -67,7 +66,7 @@ export class UserApiServiceImpl implements IUserApiService {
   }
 
   async getUser(userId: number): Promise<Result<User, AppError>> {
-    const url = `${ApiConfig.BASE_URL}${ApiConfig.Endpoints.USER_BY_ID(userId)}`;
+    const url = `${ApiConfig.BASE_URL}${ApiEndpoints.userById(userId)}`;
     this.log(`Fetching user ${userId} from: ${url}`);
 
     try {
@@ -96,7 +95,7 @@ export class UserApiServiceImpl implements IUserApiService {
   }
 
   async createUser(request: CreateUserRequest): Promise<Result<User, AppError>> {
-    const url = `${ApiConfig.BASE_URL}${ApiConfig.Endpoints.USERS}`;
+    const url = `${ApiConfig.BASE_URL}${ApiEndpoints.USERS}`;
     const body = UserDtoMapper.toCreateDto(request);
     this.log(`Creating user at: ${url}`);
 
@@ -124,7 +123,7 @@ export class UserApiServiceImpl implements IUserApiService {
   }
 
   async updateUser(request: UpdateUserRequest): Promise<Result<User, AppError>> {
-    const url = `${ApiConfig.BASE_URL}${ApiConfig.Endpoints.USER_BY_ID(request.id)}`;
+    const url = `${ApiConfig.BASE_URL}${ApiEndpoints.userById(request.id)}`;
     const body = UserDtoMapper.toUpdateDto(request);
     this.log(`Updating user ${request.id} at: ${url}`);
 
@@ -155,7 +154,7 @@ export class UserApiServiceImpl implements IUserApiService {
   }
 
   async deleteUser(userId: number): Promise<Result<void, AppError>> {
-    const url = `${ApiConfig.BASE_URL}${ApiConfig.Endpoints.USER_BY_ID(userId)}`;
+    const url = `${ApiConfig.BASE_URL}${ApiEndpoints.userById(userId)}`;
     this.log(`Deleting user ${userId} at: ${url}`);
 
     try {
@@ -188,14 +187,14 @@ export class UserApiServiceImpl implements IUserApiService {
   }
 
   private getHeaders(): Record<string, string> {
-    return {
-      'Content-Type': ApiConfig.Headers.CONTENT_TYPE,
-      'Accept': ApiConfig.Headers.ACCEPT,
-      [ApiConfig.Headers.API_KEY_HEADER]: ApiConfig.API_KEY
-    };
+    const headers: Record<string, string> = {};
+    headers['Content-Type'] = ApiHeaders.CONTENT_TYPE;
+    headers['Accept'] = ApiHeaders.ACCEPT;
+    headers[ApiHeaders.API_KEY_HEADER] = ApiConfig.API_KEY;
+    return headers;
   }
 
-  private handleError(error: unknown): AppError {
+  private handleError(error: Error | Object): AppError {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
       if (message.includes('timeout')) {

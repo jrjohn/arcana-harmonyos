@@ -34,7 +34,14 @@
         ]
       }
     ],
-    "extensionAbilities": [],
+    "extensionAbilities": [
+      {
+        "name": "SyncWorker",
+        "srcEntry": "./ets/workers/SyncWorker.ets",
+        "type": "workScheduler",
+        "description": "Background sync worker for offline-first data synchronization"
+      }
+    ],
     "requestPermissions": [
       {
         "name": "ohos.permission.INTERNET",

@@ -7,7 +7,7 @@ import { preferences } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { injectable, preDestroy } from '../../core/di/decorators';
 import { IUserLocalDataSource, ILogger } from '../../core/di/interfaces';
-import { LocalUser, SyncStatus, LocalUserFactory } from '../../domain/models/User';
+import { LocalUser, SyncStatus } from '../../domain/models/User';
 
 const TAG = 'UserLocalDataSourceImpl';
 const PREFERENCES_NAME = 'arcana_users';
@@ -40,7 +40,7 @@ export class UserLocalDataSourceImpl implements IUserLocalDataSource {
       this.log('Preferences initialized successfully');
     } catch (error) {
       this.logError(`Failed to initialize preferences: ${error}`);
-      throw error;
+      throw new Error(`Failed to initialize preferences: ${error}`);
     }
   }
 
@@ -92,7 +92,7 @@ export class UserLocalDataSourceImpl implements IUserLocalDataSource {
       this.log(`Saved user: ${user.id}`);
     } catch (error) {
       this.logError(`Failed to save user: ${error}`);
-      throw error;
+      throw new Error(`Failed to save user: ${error}`);
     }
   }
 
@@ -113,7 +113,7 @@ export class UserLocalDataSourceImpl implements IUserLocalDataSource {
       this.log(`Saved ${users.length} users, total: ${mergedUsers.length}`);
     } catch (error) {
       this.logError(`Failed to save users: ${error}`);
-      throw error;
+      throw new Error(`Failed to save users: ${error}`);
     }
   }
 
@@ -129,7 +129,7 @@ export class UserLocalDataSourceImpl implements IUserLocalDataSource {
       this.log(`Deleted user: ${userId}`);
     } catch (error) {
       this.logError(`Failed to delete user: ${error}`);
-      throw error;
+      throw new Error(`Failed to delete user: ${error}`);
     }
   }
 
@@ -141,7 +141,7 @@ export class UserLocalDataSourceImpl implements IUserLocalDataSource {
       this.log('Cleared all local data');
     } catch (error) {
       this.logError(`Failed to clear data: ${error}`);
-      throw error;
+      throw new Error(`Failed to clear data: ${error}`);
     }
   }
 

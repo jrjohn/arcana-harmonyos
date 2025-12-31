@@ -4,6 +4,8 @@ import { Success, Failure } from '../../domain/models/Result';
 import { NetworkMonitor, NetworkStatus, UnsubscribeCallback } from '../network/NetworkMonitor';
 import { AppError } from '../../domain/models/AppError';
 import { Logger } from '../logging/Logger';
+import { BackgroundScheduler, WorkType, DEFAULT_WORK_CONFIGS } from '../scheduling/BackgroundScheduler';
+import { SyncExecutor, SyncResult } from './SyncExecutor';
 
 const TAG = 'SyncManager';
 
@@ -42,6 +44,11 @@ export class SyncUnsubscribeCallback {
 /**
  * Manages offline-first synchronization of user data.
  * Handles queuing, retrying, and conflict resolution.
+ *
+ * Integrates with:
+ * - BackgroundScheduler for persistent background sync (survives app restarts)
+ * - SyncExecutor for actual sync operations
+ * - NetworkMonitor for connectivity-aware sync triggering
  */
 export class SyncManager {
   private repository: UserRepositoryImpl;
@@ -50,6 +57,8 @@ export class SyncManager {
   private syncState: SyncState;
   private networkUnsubscribe: UnsubscribeCallback | null = null;
   private syncTimeoutId: number | null = null;
+  private backgroundScheduler: BackgroundScheduler;
+  private isBackgroundSchedulerInitialized: boolean = false;
 
   private initSyncState(): void {
     this.syncState = {
@@ -63,10 +72,11 @@ export class SyncManager {
   // Retry configuration
   private readonly maxRetries = 3;
   private readonly retryDelayMs = 2000;
-  private readonly syncIntervalMs = 30000; // 30 seconds
+  private readonly syncIntervalMs = 30000; // 30 seconds (for foreground fallback)
 
   constructor(repository: UserRepositoryImpl) {
     this.repository = repository;
+    this.backgroundScheduler = new BackgroundScheduler();
     this.syncState = {
       isSyncing: false,
       pendingCount: 0,
@@ -75,6 +85,49 @@ export class SyncManager {
     };
     this.setupNetworkListener();
     this.updatePendingCount();
+    this.initializeBackgroundScheduler();
+  }
+
+  /**
+   * Initialize background scheduler for persistent sync
+   */
+  private async initializeBackgroundScheduler(): Promise<void> {
+    try {
+      // Register sync callback
+      this.backgroundScheduler.registerCallback(WorkType.SYNC, async () => {
+        const executor = new SyncExecutor();
+        try {
+          const result = await executor.executePendingSync();
+          this.handleSyncResult(result);
+        } finally {
+          executor.destroy();
+        }
+      });
+
+      // Start the scheduler
+      await this.backgroundScheduler.start();
+      this.isBackgroundSchedulerInitialized = true;
+      Logger.i(TAG, 'Background scheduler initialized for persistent sync');
+    } catch (error) {
+      Logger.e(TAG, `Failed to initialize background scheduler: ${error}`);
+      // Fall back to timeout-based scheduling
+      this.isBackgroundSchedulerInitialized = false;
+    }
+  }
+
+  /**
+   * Handle sync result from background executor
+   */
+  private handleSyncResult(result: SyncResult): void {
+    this.syncState.lastSyncTime = result.endTime;
+    if (result.failedCount > 0) {
+      this.syncState.lastSyncError = `${result.failedCount} items failed to sync`;
+    } else {
+      this.syncState.lastSyncError = undefined;
+    }
+    this.updatePendingCount();
+    this.notifySyncStateChanged();
+    Logger.i(TAG, `Background sync completed: ${result.syncedCount}/${result.totalCount} synced in ${result.durationMs}ms`);
   }
 
   /**
@@ -330,22 +383,88 @@ export class SyncManager {
   }
 
   /**
-   * Schedules background sync
+   * Schedules background sync using WorkScheduler (persistent) with fallback to setTimeout
+   *
+   * WorkScheduler benefits:
+   * - Survives app kills and device reboots (isPersisted: true)
+   * - System manages optimal execution time based on battery/network
+   * - Minimum interval: 2 hours for periodic, immediate for one-time
    */
   async scheduleBackgroundSync(): Promise<void> {
-    // In HarmonyOS, you would use WorkScheduler for background tasks
-    // For now, we'll use a simple timeout
+    // Try to use WorkScheduler for persistent background sync
+    if (this.isBackgroundSchedulerInitialized) {
+      try {
+        // Schedule one-time immediate sync
+        const scheduled = await this.backgroundScheduler.scheduleOneTimeWork(WorkType.SYNC, 0);
+        if (scheduled) {
+          Logger.d(TAG, 'Background sync scheduled via WorkScheduler');
+          return;
+        }
+      } catch (error) {
+        Logger.w(TAG, `WorkScheduler scheduling failed, falling back to timeout: ${error}`);
+      }
+    }
+
+    // Fallback to setTimeout for immediate foreground sync
     if (this.syncTimeoutId !== null) {
       clearTimeout(this.syncTimeoutId);
     }
 
     const timeoutId: number = setTimeout(async () => {
-      Logger.d(TAG, 'Background sync triggered');
+      Logger.d(TAG, 'Background sync triggered (timeout fallback)');
       await this.triggerSync();
     }, this.syncIntervalMs);
     this.syncTimeoutId = timeoutId;
 
-    Logger.d(TAG, `Background sync scheduled in ${this.syncIntervalMs}ms`);
+    Logger.d(TAG, `Background sync scheduled in ${this.syncIntervalMs}ms (timeout fallback)`);
+  }
+
+  /**
+   * Schedule periodic background sync that survives app restarts
+   * This should be called once during app initialization
+   */
+  async schedulePeriodicSync(): Promise<boolean> {
+    if (!this.isBackgroundSchedulerInitialized) {
+      Logger.w(TAG, 'Background scheduler not initialized, cannot schedule periodic sync');
+      return false;
+    }
+
+    try {
+      const config = DEFAULT_WORK_CONFIGS[WorkType.SYNC];
+      const scheduled = await this.backgroundScheduler.schedulePeriodicWork(config);
+      if (scheduled) {
+        Logger.i(TAG, `Periodic sync scheduled every ${config.intervalMinutes} minutes`);
+      }
+      return scheduled;
+    } catch (error) {
+      Logger.e(TAG, `Failed to schedule periodic sync: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Check if periodic sync is already scheduled
+   */
+  async isPeriodicSyncScheduled(): Promise<boolean> {
+    if (!this.isBackgroundSchedulerInitialized) {
+      return false;
+    }
+    return await this.backgroundScheduler.isWorkScheduled(WorkType.SYNC);
+  }
+
+  /**
+   * Cancel all scheduled background sync tasks
+   */
+  async cancelScheduledSync(): Promise<void> {
+    if (this.isBackgroundSchedulerInitialized) {
+      await this.backgroundScheduler.cancelWork(WorkType.SYNC);
+      Logger.d(TAG, 'Scheduled sync cancelled');
+    }
+
+    if (this.syncTimeoutId !== null) {
+      clearTimeout(this.syncTimeoutId);
+      this.syncTimeoutId = null;
+    }
   }
 
   /**
@@ -374,6 +493,12 @@ export class SyncManager {
     if (this.syncTimeoutId !== null) {
       clearTimeout(this.syncTimeoutId);
       this.syncTimeoutId = null;
+    }
+
+    // Stop background scheduler
+    if (this.isBackgroundSchedulerInitialized) {
+      this.backgroundScheduler.stop();
+      this.isBackgroundSchedulerInitialized = false;
     }
 
     this.callbacks.clear();
