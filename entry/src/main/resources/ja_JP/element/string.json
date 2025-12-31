@@ -1,0 +1,252 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Arcana HarmonyOS - ユーザー管理アプリ"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Arcana アプリのメインエントリー"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Arcana"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "サーバーとユーザーデータを同期するために必要です"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "ネットワーク接続状況を確認するために必要です"
+    },
+    {
+      "name": "app_name",
+      "value": "Arcana"
+    },
+    {
+      "name": "users",
+      "value": "ユーザー"
+    },
+    {
+      "name": "create_user",
+      "value": "ユーザー作成"
+    },
+    {
+      "name": "edit_user",
+      "value": "ユーザー編集"
+    },
+    {
+      "name": "user_detail",
+      "value": "ユーザー詳細"
+    },
+    {
+      "name": "first_name",
+      "value": "名"
+    },
+    {
+      "name": "last_name",
+      "value": "姓"
+    },
+    {
+      "name": "email",
+      "value": "メールアドレス"
+    },
+    {
+      "name": "avatar",
+      "value": "アバター"
+    },
+    {
+      "name": "save",
+      "value": "保存"
+    },
+    {
+      "name": "cancel",
+      "value": "キャンセル"
+    },
+    {
+      "name": "delete",
+      "value": "削除"
+    },
+    {
+      "name": "confirm_delete",
+      "value": "このユーザーを削除してもよろしいですか？"
+    },
+    {
+      "name": "loading",
+      "value": "読み込み中..."
+    },
+    {
+      "name": "error_loading",
+      "value": "データの読み込みに失敗しました"
+    },
+    {
+      "name": "retry",
+      "value": "再試行"
+    },
+    {
+      "name": "offline_mode",
+      "value": "オフラインモード"
+    },
+    {
+      "name": "syncing",
+      "value": "同期中..."
+    },
+    {
+      "name": "no_users",
+      "value": "ユーザーがいません"
+    },
+    {
+      "name": "first_name_required",
+      "value": "名を入力してください"
+    },
+    {
+      "name": "first_name_too_short",
+      "value": "名は2文字以上で入力してください"
+    },
+    {
+      "name": "last_name_required",
+      "value": "姓を入力してください"
+    },
+    {
+      "name": "last_name_too_short",
+      "value": "姓は2文字以上で入力してください"
+    },
+    {
+      "name": "email_required",
+      "value": "メールアドレスを入力してください"
+    },
+    {
+      "name": "email_invalid",
+      "value": "有効なメールアドレスを入力してください"
+    },
+    {
+      "name": "user_created",
+      "value": "ユーザーを作成しました"
+    },
+    {
+      "name": "user_updated",
+      "value": "ユーザーを更新しました"
+    },
+    {
+      "name": "user_deleted",
+      "value": "ユーザーを削除しました"
+    },
+    {
+      "name": "pending_sync",
+      "value": "同期待ち"
+    },
+    {
+      "name": "ok",
+      "value": "OK"
+    },
+    {
+      "name": "edit",
+      "value": "編集"
+    },
+    {
+      "name": "create",
+      "value": "作成"
+    },
+    {
+      "name": "search",
+      "value": "検索"
+    },
+    {
+      "name": "search_users",
+      "value": "ユーザーを検索..."
+    },
+    {
+      "name": "no_results",
+      "value": "結果が見つかりません"
+    },
+    {
+      "name": "error",
+      "value": "エラー"
+    },
+    {
+      "name": "network_error",
+      "value": "ネットワークエラー。接続を確認してください。"
+    },
+    {
+      "name": "unknown_error",
+      "value": "不明なエラーが発生しました"
+    },
+    {
+      "name": "sync_complete",
+      "value": "同期完了"
+    },
+    {
+      "name": "sync_failed",
+      "value": "同期に失敗しました"
+    },
+    {
+      "name": "pending_changes",
+      "value": "%d 件の保留中の変更"
+    },
+    {
+      "name": "user_count_one",
+      "value": "%d 人のユーザー"
+    },
+    {
+      "name": "user_count_other",
+      "value": "%d 人のユーザー"
+    },
+    {
+      "name": "settings",
+      "value": "設定"
+    },
+    {
+      "name": "language",
+      "value": "言語"
+    },
+    {
+      "name": "theme",
+      "value": "テーマ"
+    },
+    {
+      "name": "dark_mode",
+      "value": "ダークモード"
+    },
+    {
+      "name": "light_mode",
+      "value": "ライトモード"
+    },
+    {
+      "name": "system_default",
+      "value": "システム設定に従う"
+    },
+    {
+      "name": "about",
+      "value": "アプリについて"
+    },
+    {
+      "name": "version",
+      "value": "バージョン"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "プライバシーポリシー"
+    },
+    {
+      "name": "terms_of_service",
+      "value": "利用規約"
+    },
+    {
+      "name": "welcome_message",
+      "value": "Arcana へようこそ"
+    },
+    {
+      "name": "goodbye_message",
+      "value": "またお会いしましょう！"
+    },
+    {
+      "name": "last_updated",
+      "value": "最終更新：%s"
+    },
+    {
+      "name": "created_by",
+      "value": "%s が作成"
+    }
+  ]
+}

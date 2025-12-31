@@ -1,0 +1,252 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Arcana HarmonyOS - User Management App"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Main entry ability for Arcana app"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Arcana"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "Required for syncing user data with the server"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "Required for checking network connectivity status"
+    },
+    {
+      "name": "app_name",
+      "value": "Arcana"
+    },
+    {
+      "name": "users",
+      "value": "Users"
+    },
+    {
+      "name": "create_user",
+      "value": "Create User"
+    },
+    {
+      "name": "edit_user",
+      "value": "Edit User"
+    },
+    {
+      "name": "user_detail",
+      "value": "User Detail"
+    },
+    {
+      "name": "first_name",
+      "value": "First Name"
+    },
+    {
+      "name": "last_name",
+      "value": "Last Name"
+    },
+    {
+      "name": "email",
+      "value": "Email"
+    },
+    {
+      "name": "avatar",
+      "value": "Avatar"
+    },
+    {
+      "name": "save",
+      "value": "Save"
+    },
+    {
+      "name": "cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "delete",
+      "value": "Delete"
+    },
+    {
+      "name": "confirm_delete",
+      "value": "Are you sure you want to delete this user?"
+    },
+    {
+      "name": "loading",
+      "value": "Loading..."
+    },
+    {
+      "name": "error_loading",
+      "value": "Error loading data"
+    },
+    {
+      "name": "retry",
+      "value": "Retry"
+    },
+    {
+      "name": "offline_mode",
+      "value": "Offline Mode"
+    },
+    {
+      "name": "syncing",
+      "value": "Syncing..."
+    },
+    {
+      "name": "no_users",
+      "value": "No users found"
+    },
+    {
+      "name": "first_name_required",
+      "value": "First name is required"
+    },
+    {
+      "name": "first_name_too_short",
+      "value": "First name must be at least 2 characters"
+    },
+    {
+      "name": "last_name_required",
+      "value": "Last name is required"
+    },
+    {
+      "name": "last_name_too_short",
+      "value": "Last name must be at least 2 characters"
+    },
+    {
+      "name": "email_required",
+      "value": "Email is required"
+    },
+    {
+      "name": "email_invalid",
+      "value": "Please enter a valid email address"
+    },
+    {
+      "name": "user_created",
+      "value": "User created successfully"
+    },
+    {
+      "name": "user_updated",
+      "value": "User updated successfully"
+    },
+    {
+      "name": "user_deleted",
+      "value": "User deleted successfully"
+    },
+    {
+      "name": "pending_sync",
+      "value": "Pending sync"
+    },
+    {
+      "name": "ok",
+      "value": "OK"
+    },
+    {
+      "name": "edit",
+      "value": "Edit"
+    },
+    {
+      "name": "create",
+      "value": "Create"
+    },
+    {
+      "name": "search",
+      "value": "Search"
+    },
+    {
+      "name": "search_users",
+      "value": "Search users..."
+    },
+    {
+      "name": "no_results",
+      "value": "No results found"
+    },
+    {
+      "name": "error",
+      "value": "Error"
+    },
+    {
+      "name": "network_error",
+      "value": "Network error. Please check your connection."
+    },
+    {
+      "name": "unknown_error",
+      "value": "An unknown error occurred"
+    },
+    {
+      "name": "sync_complete",
+      "value": "Sync complete"
+    },
+    {
+      "name": "sync_failed",
+      "value": "Sync failed"
+    },
+    {
+      "name": "pending_changes",
+      "value": "%d pending changes"
+    },
+    {
+      "name": "user_count_one",
+      "value": "%d user"
+    },
+    {
+      "name": "user_count_other",
+      "value": "%d users"
+    },
+    {
+      "name": "settings",
+      "value": "Settings"
+    },
+    {
+      "name": "language",
+      "value": "Language"
+    },
+    {
+      "name": "theme",
+      "value": "Theme"
+    },
+    {
+      "name": "dark_mode",
+      "value": "Dark Mode"
+    },
+    {
+      "name": "light_mode",
+      "value": "Light Mode"
+    },
+    {
+      "name": "system_default",
+      "value": "System Default"
+    },
+    {
+      "name": "about",
+      "value": "About"
+    },
+    {
+      "name": "version",
+      "value": "Version"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "Privacy Policy"
+    },
+    {
+      "name": "terms_of_service",
+      "value": "Terms of Service"
+    },
+    {
+      "name": "welcome_message",
+      "value": "Welcome to Arcana"
+    },
+    {
+      "name": "goodbye_message",
+      "value": "See you soon!"
+    },
+    {
+      "name": "last_updated",
+      "value": "Last updated: %s"
+    },
+    {
+      "name": "created_by",
+      "value": "Created by %s"
+    }
+  ]
+}

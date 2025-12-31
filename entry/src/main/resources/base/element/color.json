@@ -1,0 +1,80 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "primary",
+      "value": "#7C3AED"
+    },
+    {
+      "name": "primary_dark",
+      "value": "#5B21B6"
+    },
+    {
+      "name": "primary_light",
+      "value": "#A78BFA"
+    },
+    {
+      "name": "secondary",
+      "value": "#8B5CF6"
+    },
+    {
+      "name": "accent",
+      "value": "#C4B5FD"
+    },
+    {
+      "name": "background",
+      "value": "#F5F3FF"
+    },
+    {
+      "name": "surface",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "error",
+      "value": "#DC2626"
+    },
+    {
+      "name": "success",
+      "value": "#16A34A"
+    },
+    {
+      "name": "warning",
+      "value": "#D97706"
+    },
+    {
+      "name": "text_primary",
+      "value": "#1F2937"
+    },
+    {
+      "name": "text_secondary",
+      "value": "#6B7280"
+    },
+    {
+      "name": "text_hint",
+      "value": "#9CA3AF"
+    },
+    {
+      "name": "divider",
+      "value": "#E5E7EB"
+    },
+    {
+      "name": "gradient_start",
+      "value": "#7C3AED"
+    },
+    {
+      "name": "gradient_end",
+      "value": "#A78BFA"
+    },
+    {
+      "name": "offline_banner",
+      "value": "#FEF3C7"
+    },
+    {
+      "name": "sync_pending",
+      "value": "#FCD34D"
+    }
+  ]
+}

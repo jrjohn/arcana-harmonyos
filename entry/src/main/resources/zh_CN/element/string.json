@@ -1,0 +1,252 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Arcana HarmonyOS - 用户管理应用"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Arcana 应用主入口"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Arcana"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "需要网络权限以同步用户数据到服务器"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "需要检查网络连接状态"
+    },
+    {
+      "name": "app_name",
+      "value": "Arcana"
+    },
+    {
+      "name": "users",
+      "value": "用户"
+    },
+    {
+      "name": "create_user",
+      "value": "创建用户"
+    },
+    {
+      "name": "edit_user",
+      "value": "编辑用户"
+    },
+    {
+      "name": "user_detail",
+      "value": "用户详情"
+    },
+    {
+      "name": "first_name",
+      "value": "名"
+    },
+    {
+      "name": "last_name",
+      "value": "姓"
+    },
+    {
+      "name": "email",
+      "value": "电子邮箱"
+    },
+    {
+      "name": "avatar",
+      "value": "头像"
+    },
+    {
+      "name": "save",
+      "value": "保存"
+    },
+    {
+      "name": "cancel",
+      "value": "取消"
+    },
+    {
+      "name": "delete",
+      "value": "删除"
+    },
+    {
+      "name": "confirm_delete",
+      "value": "确定要删除此用户吗？"
+    },
+    {
+      "name": "loading",
+      "value": "加载中..."
+    },
+    {
+      "name": "error_loading",
+      "value": "加载数据失败"
+    },
+    {
+      "name": "retry",
+      "value": "重试"
+    },
+    {
+      "name": "offline_mode",
+      "value": "离线模式"
+    },
+    {
+      "name": "syncing",
+      "value": "同步中..."
+    },
+    {
+      "name": "no_users",
+      "value": "暂无用户"
+    },
+    {
+      "name": "first_name_required",
+      "value": "请输入名"
+    },
+    {
+      "name": "first_name_too_short",
+      "value": "名至少需要2个字符"
+    },
+    {
+      "name": "last_name_required",
+      "value": "请输入姓"
+    },
+    {
+      "name": "last_name_too_short",
+      "value": "姓至少需要2个字符"
+    },
+    {
+      "name": "email_required",
+      "value": "请输入电子邮箱"
+    },
+    {
+      "name": "email_invalid",
+      "value": "请输入有效的电子邮箱地址"
+    },
+    {
+      "name": "user_created",
+      "value": "用户创建成功"
+    },
+    {
+      "name": "user_updated",
+      "value": "用户更新成功"
+    },
+    {
+      "name": "user_deleted",
+      "value": "用户删除成功"
+    },
+    {
+      "name": "pending_sync",
+      "value": "待同步"
+    },
+    {
+      "name": "ok",
+      "value": "确定"
+    },
+    {
+      "name": "edit",
+      "value": "编辑"
+    },
+    {
+      "name": "create",
+      "value": "创建"
+    },
+    {
+      "name": "search",
+      "value": "搜索"
+    },
+    {
+      "name": "search_users",
+      "value": "搜索用户..."
+    },
+    {
+      "name": "no_results",
+      "value": "未找到结果"
+    },
+    {
+      "name": "error",
+      "value": "错误"
+    },
+    {
+      "name": "network_error",
+      "value": "网络错误，请检查您的网络连接"
+    },
+    {
+      "name": "unknown_error",
+      "value": "发生未知错误"
+    },
+    {
+      "name": "sync_complete",
+      "value": "同步完成"
+    },
+    {
+      "name": "sync_failed",
+      "value": "同步失败"
+    },
+    {
+      "name": "pending_changes",
+      "value": "%d 项待处理更改"
+    },
+    {
+      "name": "user_count_one",
+      "value": "%d 位用户"
+    },
+    {
+      "name": "user_count_other",
+      "value": "%d 位用户"
+    },
+    {
+      "name": "settings",
+      "value": "设置"
+    },
+    {
+      "name": "language",
+      "value": "语言"
+    },
+    {
+      "name": "theme",
+      "value": "主题"
+    },
+    {
+      "name": "dark_mode",
+      "value": "深色模式"
+    },
+    {
+      "name": "light_mode",
+      "value": "浅色模式"
+    },
+    {
+      "name": "system_default",
+      "value": "跟随系统"
+    },
+    {
+      "name": "about",
+      "value": "关于"
+    },
+    {
+      "name": "version",
+      "value": "版本"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "隐私政策"
+    },
+    {
+      "name": "terms_of_service",
+      "value": "服务条款"
+    },
+    {
+      "name": "welcome_message",
+      "value": "欢迎使用 Arcana"
+    },
+    {
+      "name": "goodbye_message",
+      "value": "再见！"
+    },
+    {
+      "name": "last_updated",
+      "value": "最后更新：%s"
+    },
+    {
+      "name": "created_by",
+      "value": "由 %s 创建"
+    }
+  ]
+}

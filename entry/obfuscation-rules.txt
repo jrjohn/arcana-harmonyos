@@ -1,0 +1,26 @@
+# Arcana HarmonyOS Obfuscation Rules
+# Define obfuscation rules for release builds
+
+-enable-property-obfuscation
+-enable-toplevel-obfuscation
+-enable-filename-obfuscation
+-enable-export-obfuscation
+
+# Keep model classes
+-keep-property-name
+  id
+  email
+  first_name
+  last_name
+  avatar
+  createdAt
+  updatedAt
+
+# Keep API response fields
+-keep-property-name
+  data
+  page
+  per_page
+  total
+  total_pages
+  support

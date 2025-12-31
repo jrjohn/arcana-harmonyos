@@ -1,0 +1,12 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Arcana"
+    },
+    {
+      "name": "app_description",
+      "value": "Arcana HarmonyOS - Production-grade app demonstrating Clean Architecture, Offline-First design with ArkTS"
+    }
+  ]
+}
