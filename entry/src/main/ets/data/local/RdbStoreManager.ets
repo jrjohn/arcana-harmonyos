@@ -19,45 +19,45 @@ const TAG = 'RdbStoreManager';
 /**
  * Database configuration
  */
-export const DB_CONFIG = {
-  NAME: 'arcana.db',
-  VERSION: 1,
-  SECURITY_LEVEL: relationalStore.SecurityLevel.S1
-};
+export class DB_CONFIG {
+  static readonly NAME: string = 'arcana.db';
+  static readonly VERSION: number = 1;
+  static readonly SECURITY_LEVEL: relationalStore.SecurityLevel = relationalStore.SecurityLevel.S1;
+}
 
 /**
  * Table names
  */
-export const Tables = {
-  USERS: 'users',
-  SYNC_METADATA: 'sync_metadata'
-};
+export class Tables {
+  static readonly USERS: string = 'users';
+  static readonly SYNC_METADATA: string = 'sync_metadata';
+}
 
 /**
  * User table columns
  */
-export const UserColumns = {
-  ID: 'id',
-  EMAIL: 'email',
-  FIRST_NAME: 'first_name',
-  LAST_NAME: 'last_name',
-  AVATAR: 'avatar',
-  SYNC_STATUS: 'sync_status',
-  LOCAL_ID: 'local_id',
-  CREATED_AT: 'created_at',
-  UPDATED_AT: 'updated_at',
-  SYNC_ATTEMPTS: 'sync_attempts',
-  SYNC_ERROR: 'sync_error',
-  VERSION: 'version'
-};
+export class UserColumns {
+  static readonly ID: string = 'id';
+  static readonly EMAIL: string = 'email';
+  static readonly FIRST_NAME: string = 'first_name';
+  static readonly LAST_NAME: string = 'last_name';
+  static readonly AVATAR: string = 'avatar';
+  static readonly SYNC_STATUS: string = 'sync_status';
+  static readonly LOCAL_ID: string = 'local_id';
+  static readonly CREATED_AT: string = 'created_at';
+  static readonly UPDATED_AT: string = 'updated_at';
+  static readonly SYNC_ATTEMPTS: string = 'sync_attempts';
+  static readonly SYNC_ERROR: string = 'sync_error';
+  static readonly VERSION: string = 'version';
+}
 
 /**
  * Sync metadata columns
  */
-export const SyncMetadataColumns = {
-  KEY: 'key',
-  VALUE: 'value'
-};
+export class SyncMetadataColumns {
+  static readonly KEY: string = 'key';
+  static readonly VALUE: string = 'value';
+}
 
 /**
  * SQL statements for table creation
@@ -145,8 +145,9 @@ export class RdbStoreManager {
       console.info(`${TAG}: Database initialized successfully`);
     } catch (error) {
       const e = error as BusinessError;
-      console.error(`${TAG}: Failed to initialize database: ${e.message}`);
-      throw error;
+      const message = `Failed to initialize database: ${e.message}`;
+      console.error(`${TAG}: ${message}`);
+      throw new Error(message);
     }
   }
 
@@ -257,8 +258,9 @@ export class RdbStoreManager {
       this.isInitialized = false;
       console.info(`${TAG}: Database deleted`);
     } catch (error) {
-      console.error(`${TAG}: Error deleting database: ${error}`);
-      throw error;
+      const message = `Error deleting database: ${error}`;
+      console.error(`${TAG}: ${message}`);
+      throw new Error(message);
     }
   }
 
@@ -305,7 +307,10 @@ export class RdbStoreManager {
       return result;
     } catch (error) {
       await this.rollback();
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(String(error));
     }
   }
 }

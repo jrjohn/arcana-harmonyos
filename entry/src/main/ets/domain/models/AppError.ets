@@ -37,6 +37,9 @@ export enum ErrorCode {
   SYNC_TIMEOUT = 'E5002',
   SYNC_QUEUE_FULL = 'E5003',
 
+  // Parse Errors (E6000-E6999)
+  PARSE_ERROR = 'E6000',
+
   // Unknown Error
   UNKNOWN = 'E9999'
 }
@@ -101,6 +104,8 @@ export class AppError extends Error {
         return 'Failed to sync data. Will retry automatically.';
       case ErrorCode.SYNC_CONFLICT:
         return 'Data conflict detected. Please refresh and try again.';
+      case ErrorCode.PARSE_ERROR:
+        return 'Failed to process server response. Please try again.';
       default:
         return 'An unexpected error occurred. Please try again.';
     }
@@ -198,6 +203,16 @@ export class AppErrorFactory {
       ErrorCode.SYNC_CONFLICT,
       `Sync conflict for resource: ${resourceId}`,
       undefined,
+      options
+    );
+  }
+
+  static parseError(message: string): AppError {
+    const options: AppErrorOptions = { recoverable: false };
+    return new AppError(
+      ErrorCode.PARSE_ERROR,
+      `Parse error: ${message}`,
+      'Failed to parse server response',
       options
     );
   }

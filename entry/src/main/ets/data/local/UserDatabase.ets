@@ -7,7 +7,7 @@ import { relationalStore } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { injectable, postConstruct, preDestroy } from '../../core/di/decorators';
 import { ILogger } from '../../core/di/interfaces';
-import { LocalUser, SyncStatus } from '../../domain/models/User';
+import { LocalUser, LocalUserImpl, SyncStatus } from '../../domain/models/User';
 
 const TAG = 'UserDatabase';
 
@@ -162,8 +162,9 @@ export class UserDatabase implements IUserDatabase {
       this.initialized = true;
       this.log('Database initialized successfully');
     } catch (error) {
-      this.logError(`Failed to initialize database: ${error}`);
-      throw error;
+      const message = `Failed to initialize database: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -187,8 +188,9 @@ export class UserDatabase implements IUserDatabase {
         this.log(`Updated user: ${user.id}`);
       }
     } catch (error) {
-      this.logError(`Failed to upsert user: ${error}`);
-      throw error;
+      const message = `Failed to upsert user: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -213,8 +215,9 @@ export class UserDatabase implements IUserDatabase {
       this.log(`Upserted ${users.length} users`);
     } catch (error) {
       await this.rdbStore!.rollBack();
-      this.logError(`Failed to upsert users: ${error}`);
-      throw error;
+      const message = `Failed to upsert users: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -332,8 +335,9 @@ export class UserDatabase implements IUserDatabase {
       await this.rdbStore!.delete(predicates);
       this.log(`Deleted user: ${id}`);
     } catch (error) {
-      this.logError(`Failed to delete user: ${error}`);
-      throw error;
+      const message = `Failed to delete user: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -363,8 +367,9 @@ export class UserDatabase implements IUserDatabase {
       await this.rdbStore!.delete(predicates);
       this.log('Cleared all users');
     } catch (error) {
-      this.logError(`Failed to clear users: ${error}`);
-      throw error;
+      const message = `Failed to clear users: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -397,8 +402,8 @@ export class UserDatabase implements IUserDatabase {
 
     try {
       const valueBucket: relationalStore.ValuesBucket = {
-        [COL_KEY]: key,
-        [COL_VALUE]: value
+        'key': key,
+        'value': value
       };
 
       const predicates = new relationalStore.RdbPredicates(TABLE_METADATA);
@@ -411,8 +416,9 @@ export class UserDatabase implements IUserDatabase {
 
       this.log(`Set metadata: ${key}`);
     } catch (error) {
-      this.logError(`Failed to set metadata: ${error}`);
-      throw error;
+      const message = `Failed to set metadata: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -428,38 +434,54 @@ export class UserDatabase implements IUserDatabase {
   // ===== Private Methods =====
 
   private userToValueBucket(user: LocalUser): relationalStore.ValuesBucket {
-    return {
-      [COL_ID]: user.id,
-      [COL_LOCAL_ID]: user.localId,
-      [COL_EMAIL]: user.email,
-      [COL_FIRST_NAME]: user.firstName,
-      [COL_LAST_NAME]: user.lastName,
-      [COL_AVATAR]: user.avatar || '',
-      [COL_SYNC_STATUS]: user.syncStatus,
-      [COL_SYNC_ATTEMPTS]: user.syncAttempts,
-      [COL_SYNC_ERROR]: user.syncError || '',
-      [COL_CREATED_AT]: user.createdAt,
-      [COL_UPDATED_AT]: user.updatedAt
+    const bucket: relationalStore.ValuesBucket = {
+      'id': user.id,
+      'local_id': user.localId,
+      'email': user.email,
+      'first_name': user.firstName,
+      'last_name': user.lastName,
+      'avatar': user.avatar || '',
+      'sync_status': user.syncStatus,
+      'sync_attempts': user.syncAttempts,
+      'sync_error': user.syncError || '',
+      'created_at': user.createdAt,
+      'updated_at': user.updatedAt
     };
+    return bucket;
   }
 
   private resultSetToUsers(resultSet: relationalStore.ResultSet): LocalUser[] {
     const users: LocalUser[] = [];
 
     while (resultSet.goToNextRow()) {
-      users.push({
-        id: resultSet.getLong(resultSet.getColumnIndex(COL_ID)),
-        localId: resultSet.getString(resultSet.getColumnIndex(COL_LOCAL_ID)),
-        email: resultSet.getString(resultSet.getColumnIndex(COL_EMAIL)),
-        firstName: resultSet.getString(resultSet.getColumnIndex(COL_FIRST_NAME)),
-        lastName: resultSet.getString(resultSet.getColumnIndex(COL_LAST_NAME)),
-        avatar: resultSet.getString(resultSet.getColumnIndex(COL_AVATAR)) || undefined,
-        syncStatus: resultSet.getString(resultSet.getColumnIndex(COL_SYNC_STATUS)) as SyncStatus,
-        syncAttempts: resultSet.getLong(resultSet.getColumnIndex(COL_SYNC_ATTEMPTS)),
-        syncError: resultSet.getString(resultSet.getColumnIndex(COL_SYNC_ERROR)) || undefined,
-        createdAt: resultSet.getLong(resultSet.getColumnIndex(COL_CREATED_AT)),
-        updatedAt: resultSet.getLong(resultSet.getColumnIndex(COL_UPDATED_AT))
-      });
+      const id = resultSet.getLong(resultSet.getColumnIndex(COL_ID));
+      const localId = resultSet.getString(resultSet.getColumnIndex(COL_LOCAL_ID));
+      const email = resultSet.getString(resultSet.getColumnIndex(COL_EMAIL));
+      const firstName = resultSet.getString(resultSet.getColumnIndex(COL_FIRST_NAME));
+      const lastName = resultSet.getString(resultSet.getColumnIndex(COL_LAST_NAME));
+      const avatar = resultSet.getString(resultSet.getColumnIndex(COL_AVATAR)) || '';
+      const syncStatus = resultSet.getString(resultSet.getColumnIndex(COL_SYNC_STATUS)) as SyncStatus;
+      const syncAttempts = resultSet.getLong(resultSet.getColumnIndex(COL_SYNC_ATTEMPTS));
+      const syncErrorStr = resultSet.getString(resultSet.getColumnIndex(COL_SYNC_ERROR));
+      const syncError = syncErrorStr && syncErrorStr.length > 0 ? syncErrorStr : undefined;
+      const createdAt = resultSet.getLong(resultSet.getColumnIndex(COL_CREATED_AT));
+      const updatedAt = resultSet.getLong(resultSet.getColumnIndex(COL_UPDATED_AT));
+
+      const user = new LocalUserImpl(
+        id,
+        email,
+        firstName,
+        lastName,
+        avatar,
+        syncStatus,
+        localId,
+        createdAt,
+        updatedAt,
+        syncAttempts,
+        syncError,
+        1 // default version
+      );
+      users.push(user);
     }
 
     return users;
