@@ -40,10 +40,9 @@ struct HomePage {
 
     try {
       const container = getContainer();
-      const repository = container.getUserRepository();
-      const analytics = container.getAnalyticsService();
 
-      this.viewModel = new HomeViewModel(repository, analytics);
+      // Use DI factory instead of manual instantiation
+      this.viewModel = container.createHomeViewModel();
 
       // Subscribe to state changes
       this.stateUnsubscribe = this.viewModel.subscribeToState((newState) => {
@@ -56,6 +55,7 @@ struct HomePage {
       });
 
       // Track screen
+      const analytics = container.getAnalyticsService();
       analytics.trackScreen('HomePage', 'HomePage');
 
       // Load data

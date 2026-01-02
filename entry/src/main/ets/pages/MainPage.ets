@@ -82,10 +82,9 @@ struct MainPage {
   private initializeHomeViewModel(): void {
     try {
       const container = getContainer();
-      const repository = container.getUserRepository();
-      const analytics = container.getAnalyticsService();
 
-      this.homeViewModel = new HomeViewModel(repository, analytics);
+      // Use DI factory instead of manual instantiation
+      this.homeViewModel = container.createHomeViewModel();
 
       this.homeStateUnsubscribe = this.homeViewModel.subscribeToState((newState) => {
         this.homeState = newState;
@@ -95,6 +94,7 @@ struct MainPage {
         this.handleHomeEffect(effect);
       });
 
+      const analytics = container.getAnalyticsService();
       analytics.trackScreen('MainPage', 'HomePage');
       this.homeViewModel.onEvent({ type: 'LoadData' });
     } catch (error) {
@@ -105,11 +105,9 @@ struct MainPage {
   private initializeUserListViewModel(): void {
     try {
       const container = getContainer();
-      const repository = container.getUserRepository();
-      const syncManager = container.getSyncManager();
-      const analytics = container.getAnalyticsService();
 
-      this.userListViewModel = new UserListViewModel(repository, syncManager, analytics);
+      // Use DI factory instead of manual instantiation
+      this.userListViewModel = container.createUserListViewModel();
 
       this.userListStateUnsubscribe = this.userListViewModel.subscribeToState((newState) => {
         this.userListState = newState;

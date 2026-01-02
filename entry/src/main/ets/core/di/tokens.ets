@@ -30,7 +30,8 @@ export interface ServiceTokens {
   UserValidator: string;
   UserService: string;
 
-  // Presentation
+  // Presentation - ViewModels
+  HomeViewModel: string;
   UserListViewModel: string;
   UserDetailViewModel: string;
   UserFormViewModel: string;
@@ -69,7 +70,8 @@ class ServiceTokensImpl implements ServiceTokens {
   readonly UserValidator: string = 'UserValidator';
   readonly UserService: string = 'UserService';
 
-  // Presentation
+  // Presentation - ViewModels
+  readonly HomeViewModel: string = 'HomeViewModel';
   readonly UserListViewModel: string = 'UserListViewModel';
   readonly UserDetailViewModel: string = 'UserDetailViewModel';
   readonly UserFormViewModel: string = 'UserFormViewModel';

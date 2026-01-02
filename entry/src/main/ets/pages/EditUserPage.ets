@@ -69,10 +69,9 @@ struct EditUserPage {
 
     try {
       const container = getContainer();
-      const repository = container.getUserRepository();
-      const analytics = container.getAnalyticsService();
 
-      this.viewModel = new UserFormViewModel(repository, analytics, 'edit', userId);
+      // Use DI factory instead of manual instantiation
+      this.viewModel = container.createUserFormViewModel('edit', userId);
 
       // Subscribe to state changes
       this.stateUnsubscribe = this.viewModel.subscribeToState((newState) => {
@@ -94,6 +93,7 @@ struct EditUserPage {
       });
 
       // Track screen
+      const analytics = container.getAnalyticsService();
       analytics.trackScreen('EditUserPage', 'EditUserPage');
     } catch (error) {
       Logger.e(TAG, `Failed to initialize: ${error}`);

@@ -22,6 +22,10 @@ import { SyncManager } from '../sync/SyncManager';
 import { AnalyticsService } from '../analytics/AnalyticsService';
 import { Logger } from '../logging/Logger';
 import { NetworkMonitor } from '../network/NetworkMonitor';
+import { HomeViewModel } from '../../presentation/viewmodel/HomeViewModel';
+import { UserListViewModel } from '../../presentation/viewmodel/UserListViewModel';
+import { UserDetailViewModel } from '../../presentation/viewmodel/UserDetailViewModel';
+import { UserFormViewModel } from '../../presentation/viewmodel/UserFormViewModel';
 
 const TAG = 'AppContainer';
 
@@ -315,6 +319,49 @@ export class AppContainer {
    */
   getLogger(): ILogger {
     return this.resolve<ILogger>(TYPES.Logger);
+  }
+
+  // ===== ViewModel Factories =====
+  // Factory methods create ViewModels with proper DI (not registered as singletons)
+
+  /**
+   * Creates a HomeViewModel with injected dependencies
+   */
+  createHomeViewModel(): HomeViewModel {
+    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
+    return new HomeViewModel(repository, analytics);
+  }
+
+  /**
+   * Creates a UserListViewModel with injected dependencies
+   */
+  createUserListViewModel(): UserListViewModel {
+    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const syncManager = this.resolve<ISyncManager>(TYPES.SyncManager);
+    const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
+    return new UserListViewModel(repository, syncManager, analytics);
+  }
+
+  /**
+   * Creates a UserDetailViewModel with injected dependencies
+   * @param userId - The user ID to load
+   */
+  createUserDetailViewModel(userId: number): UserDetailViewModel {
+    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
+    return new UserDetailViewModel(repository, analytics, userId);
+  }
+
+  /**
+   * Creates a UserFormViewModel with injected dependencies
+   * @param mode - 'create' or 'edit'
+   * @param userId - Optional user ID for edit mode
+   */
+  createUserFormViewModel(mode: 'create' | 'edit', userId?: number): UserFormViewModel {
+    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
+    return new UserFormViewModel(repository, analytics, mode, userId);
   }
 }
 

@@ -46,11 +46,9 @@ struct UserListPage {
 
     try {
       const container = getContainer();
-      const repository = container.getUserRepository();
-      const syncManager = container.getSyncManager();
-      const analytics = container.getAnalyticsService();
 
-      this.viewModel = new UserListViewModel(repository, syncManager, analytics);
+      // Use DI factory instead of manual instantiation
+      this.viewModel = container.createUserListViewModel();
 
       // Subscribe to state changes
       this.stateUnsubscribe = this.viewModel.subscribeToState((newState) => {
@@ -63,6 +61,7 @@ struct UserListPage {
       });
 
       // Track screen
+      const analytics = container.getAnalyticsService();
       analytics.trackScreen('UserListPage', 'UserListPage');
 
       // Load users

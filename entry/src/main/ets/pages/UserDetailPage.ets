@@ -56,10 +56,9 @@ struct UserDetailPage {
 
     try {
       const container = getContainer();
-      const repository = container.getUserRepository();
-      const analytics = container.getAnalyticsService();
 
-      this.viewModel = new UserDetailViewModel(repository, analytics, userId);
+      // Use DI factory instead of manual instantiation
+      this.viewModel = container.createUserDetailViewModel(userId);
 
       // Subscribe to state changes
       this.stateUnsubscribe = this.viewModel.subscribeToState((newState) => {
@@ -72,6 +71,7 @@ struct UserDetailPage {
       });
 
       // Track screen
+      const analytics = container.getAnalyticsService();
       analytics.trackScreen('UserDetailPage', 'UserDetailPage');
     } catch (error) {
       Logger.e(TAG, `Failed to initialize: ${error}`);
