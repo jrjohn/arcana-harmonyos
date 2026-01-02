@@ -1,11 +1,14 @@
-import { UserRepositoryImpl } from '../../data/repository/UserRepositoryImpl';
-import { LocalUser, SyncStatus, LocalUserImpl } from '../../domain/models/User';
+import { IUserRepositoryService, ISyncManager } from '../di/interfaces';
+import { LocalUser, SyncStatus, LocalUserImpl, User } from '../../domain/models/User';
 import { Success, Failure } from '../../domain/models/Result';
 import { NetworkMonitor, NetworkStatus, UnsubscribeCallback } from '../network/NetworkMonitor';
 import { AppError } from '../../domain/models/AppError';
 import { Logger } from '../logging/Logger';
 import { BackgroundScheduler, WorkType, DEFAULT_WORK_CONFIGS } from '../scheduling/BackgroundScheduler';
 import { SyncExecutor, SyncResult } from './SyncExecutor';
+import { ConflictResolver, ConflictResolution } from './ConflictResolver';
+import { CacheEventBus } from '../cache/CacheEventBus';
+import { injectable } from '../di/decorators';
 
 const TAG = 'SyncManager';
 
@@ -49,9 +52,12 @@ export class SyncUnsubscribeCallback {
  * - BackgroundScheduler for persistent background sync (survives app restarts)
  * - SyncExecutor for actual sync operations
  * - NetworkMonitor for connectivity-aware sync triggering
+ *
+ * Uses IUserRepositoryService interface for dependency inversion.
  */
-export class SyncManager {
-  private repository: UserRepositoryImpl;
+@injectable()
+export class SyncManager implements ISyncManager {
+  private repository: IUserRepositoryService;
   private callbacks: Set<SyncStateCallback> = new Set();
   private syncInProgress: boolean = false;
   private syncState: SyncState;
@@ -74,7 +80,7 @@ export class SyncManager {
   private readonly retryDelayMs = 2000;
   private readonly syncIntervalMs = 30000; // 30 seconds (for foreground fallback)
 
-  constructor(repository: UserRepositoryImpl) {
+  constructor(repository: IUserRepositoryService) {
     this.repository = repository;
     this.backgroundScheduler = new BackgroundScheduler();
     this.syncState = {
@@ -236,6 +242,9 @@ export class SyncManager {
       this.syncState.lastSyncTime = Date.now();
       this.syncState.lastSyncError = failureCount > 0 ? `${failureCount} items failed to sync` : undefined;
       this.notifySyncStateChanged();
+
+      // Emit sync completed event for cache invalidation
+      CacheEventBus.emitSyncCompleted(successCount, failureCount);
     } catch (error) {
       Logger.e(TAG, `Sync failed: ${error}`);
       this.syncState.isSyncing = false;
@@ -309,9 +318,37 @@ export class SyncManager {
   }
 
   /**
-   * Syncs a pending update operation
+   * Syncs a pending update operation with conflict resolution
    */
   private async syncUpdate(user: LocalUser): Promise<boolean> {
+    // First, try to fetch current server state for conflict detection
+    const serverResult = await this.repository.getUser(user.id, true);
+
+    if (serverResult.isSuccess) {
+      const successServerResult = serverResult as Success<User>;
+      const serverUser = successServerResult.value;
+
+      // Check if there's a conflict
+      if (ConflictResolver.hasConflict(user, serverUser)) {
+        Logger.d(TAG, `Conflict detected for user ${user.id}`);
+        Logger.d(TAG, ConflictResolver.getConflictDetails(user, serverUser));
+
+        // Resolve conflict using Last-Write-Wins
+        const conflictResult = ConflictResolver.resolveUserConflict(user, serverUser);
+
+        if (conflictResult.resolution === ConflictResolution.USE_REMOTE) {
+          // Remote wins - accept remote changes
+          await this.repository.saveUserToLocal(conflictResult.resolvedUser);
+          Logger.d(TAG, `Conflict resolved: using remote for user ${user.id}`);
+          return true;
+        }
+
+        // Local wins - push local changes to server
+        Logger.d(TAG, `Conflict resolved: using local for user ${user.id}, pushing to server`);
+      }
+    }
+
+    // Push local changes to server
     const result = await this.repository.updateUserOnNetwork({
       id: user.id,
       email: user.email,

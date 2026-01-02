@@ -15,16 +15,20 @@ import {
 import { TYPES } from '../../core/di/tokens';
 import {
   User,
+  UserImpl,
   CreateUserRequest,
   UpdateUserRequest,
   PaginatedUsers,
+  PaginatedUsersImpl,
   LocalUser,
+  LocalUserImpl,
   SyncStatus,
   LocalUserFactory
 } from '../../domain/models/User';
-import { Result, ResultFactory } from '../../domain/models/Result';
+import { Result, ResultFactory, Success } from '../../domain/models/Result';
 import { AppError, AppErrorFactory } from '../../domain/models/AppError';
 import { LruCache } from '../cache/LruCache';
+import { ValueUnsubscribe, ValueChangeCallback } from '../cache/ObservableCache';
 import { ApiConfig } from '../api/ApiConfig';
 
 const TAG = 'UserRepositoryService';
@@ -42,6 +46,7 @@ export class UserRepositoryService implements IUserRepositoryService {
   private pageCache: LruCache<number, PaginatedUsers>;
   private userCache: LruCache<number, User>;
   private pageCacheTimestamps: Map<number, number>;
+  private userCallbacks: Map<number, Set<ValueChangeCallback<User>>>;
 
   constructor(
     apiService: IUserApiService,
@@ -55,6 +60,7 @@ export class UserRepositoryService implements IUserRepositoryService {
     this.pageCache = new LruCache(20, ApiConfig.CACHE_TTL, 'pageCache');
     this.userCache = new LruCache(100, ApiConfig.CACHE_TTL, 'userCache');
     this.pageCacheTimestamps = new Map();
+    this.userCallbacks = new Map();
 
     this.logger.d(TAG, 'UserRepositoryService initialized');
   }
@@ -75,6 +81,7 @@ export class UserRepositoryService implements IUserRepositoryService {
   destroy(): void {
     this.pageCache.clear();
     this.userCache.clear();
+    this.userCallbacks.clear();
     this.logger.d(TAG, 'Repository destroyed');
   }
 
@@ -128,9 +135,11 @@ export class UserRepositoryService implements IUserRepositoryService {
     if (isOnline) {
       const networkResult = await this.apiService.getUser(userId);
       if (ResultFactory.isSuccess(networkResult)) {
-        const localUser = LocalUserFactory.fromUser(networkResult.value);
+        const successResult = networkResult as Success<User>;
+        const localUser = LocalUserFactory.fromUser(successResult.value);
         await this.localDataSource.saveUser(localUser);
-        this.userCache.put(userId, networkResult.value);
+        this.userCache.put(userId, successResult.value);
+        this.notifyUserSubscribers(userId, successResult.value);
         return networkResult;
       }
     }
@@ -138,13 +147,13 @@ export class UserRepositoryService implements IUserRepositoryService {
     // Try local
     const localUser = await this.localDataSource.getUser(userId);
     if (localUser) {
-      const user: User = {
-        id: localUser.id,
-        email: localUser.email,
-        firstName: localUser.firstName,
-        lastName: localUser.lastName,
-        avatar: localUser.avatar
-      };
+      const user: User = new UserImpl(
+        localUser.id,
+        localUser.email,
+        localUser.firstName,
+        localUser.lastName,
+        localUser.avatar
+      );
       return ResultFactory.success(user);
     }
 
@@ -173,8 +182,9 @@ export class UserRepositoryService implements IUserRepositoryService {
 
       if (ResultFactory.isSuccess(networkResult)) {
         // Update local with server ID
+        const successResult = networkResult as Success<User>;
         await this.localDataSource.deleteUser(pendingUser.id);
-        const syncedUser = LocalUserFactory.markAsSynced(pendingUser, networkResult.value.id);
+        const syncedUser = LocalUserFactory.markAsSynced(pendingUser, successResult.value.id);
         await this.localDataSource.saveUser(syncedUser);
         this.invalidateAllCache();
 
@@ -184,15 +194,16 @@ export class UserRepositoryService implements IUserRepositoryService {
       this.logger.w(TAG, 'Network create failed, user saved locally for sync');
     }
 
-    // Return locally created user
-    const user: User = {
-      id: pendingUser.id,
-      email: pendingUser.email,
-      firstName: pendingUser.firstName,
-      lastName: pendingUser.lastName,
-      avatar: pendingUser.avatar
-    };
+    // Return locally created user - also cache for offline consistency
+    const user: User = new UserImpl(
+      pendingUser.id,
+      pendingUser.email,
+      pendingUser.firstName,
+      pendingUser.lastName,
+      pendingUser.avatar
+    );
 
+    this.userCache.put(pendingUser.id, user);
     return ResultFactory.success(user);
   }
 
@@ -205,16 +216,21 @@ export class UserRepositoryService implements IUserRepositoryService {
       return ResultFactory.failure(AppErrorFactory.apiNotFound(`User ${request.id}`));
     }
 
-    // Update local first (optimistic)
-    const updatedLocalUser: LocalUser = {
-      ...currentUser,
-      email: request.email,
-      firstName: request.firstName,
-      lastName: request.lastName,
-      avatar: request.avatar,
-      syncStatus: SyncStatus.PENDING_UPDATE,
-      updatedAt: Date.now()
-    };
+    // Update local first (optimistic) - use factory to avoid spread operator
+    const updatedLocalUser: LocalUser = new LocalUserImpl(
+      currentUser.id,
+      request.email,
+      request.firstName,
+      request.lastName,
+      request.avatar,
+      SyncStatus.PENDING_UPDATE,
+      currentUser.localId,
+      currentUser.createdAt,
+      Date.now(),
+      currentUser.syncAttempts,
+      currentUser.syncError,
+      currentUser.version + 1
+    );
 
     await this.localDataSource.saveUser(updatedLocalUser);
     this.userCache.remove(request.id);
@@ -227,9 +243,11 @@ export class UserRepositoryService implements IUserRepositoryService {
       const networkResult = await this.updateUserOnNetwork(request);
 
       if (ResultFactory.isSuccess(networkResult)) {
+        const successResult = networkResult as Success<User>;
         const syncedUser = LocalUserFactory.markAsSynced(updatedLocalUser);
         await this.localDataSource.saveUser(syncedUser);
-        this.userCache.put(request.id, networkResult.value);
+        this.userCache.put(request.id, successResult.value);
+        this.notifyUserSubscribers(request.id, successResult.value);
 
         return networkResult;
       }
@@ -237,15 +255,17 @@ export class UserRepositoryService implements IUserRepositoryService {
       this.logger.w(TAG, 'Network update failed, user saved locally for sync');
     }
 
-    // Return optimistic update
-    const user: User = {
-      id: updatedLocalUser.id,
-      email: updatedLocalUser.email,
-      firstName: updatedLocalUser.firstName,
-      lastName: updatedLocalUser.lastName,
-      avatar: updatedLocalUser.avatar
-    };
+    // Return optimistic update - also update cache for offline consistency
+    const user: User = new UserImpl(
+      updatedLocalUser.id,
+      updatedLocalUser.email,
+      updatedLocalUser.firstName,
+      updatedLocalUser.lastName,
+      updatedLocalUser.avatar
+    );
 
+    this.userCache.put(request.id, user);
+    this.notifyUserSubscribers(request.id, user);
     return ResultFactory.success(user);
   }
 
@@ -263,6 +283,7 @@ export class UserRepositoryService implements IUserRepositoryService {
     // Remove from caches
     this.userCache.remove(userId);
     this.invalidateAllCache();
+    this.notifyUserSubscribers(userId, undefined);
 
     // Check if online
     const isOnline = await this.checkNetworkAvailable();
@@ -287,20 +308,14 @@ export class UserRepositoryService implements IUserRepositoryService {
     const allUsers = await this.localDataSource.getAllUsers();
     const lowerQuery = query.toLowerCase();
 
-    const matchingUsers = allUsers
+    const matchingUsers: User[] = allUsers
       .filter(u => u.syncStatus !== SyncStatus.PENDING_DELETE)
       .filter(u =>
         u.email.toLowerCase().includes(lowerQuery) ||
         u.firstName.toLowerCase().includes(lowerQuery) ||
         u.lastName.toLowerCase().includes(lowerQuery)
       )
-      .map(lu => ({
-        id: lu.id,
-        email: lu.email,
-        firstName: lu.firstName,
-        lastName: lu.lastName,
-        avatar: lu.avatar
-      }));
+      .map(lu => new UserImpl(lu.id, lu.email, lu.firstName, lu.lastName, lu.avatar));
 
     return ResultFactory.success(matchingUsers);
   }
@@ -313,18 +328,19 @@ export class UserRepositoryService implements IUserRepositoryService {
     const result = await this.apiService.getUsers(page);
 
     if (ResultFactory.isSuccess(result)) {
+      const successResult = result as Success<PaginatedUsers>;
       // Update local cache with network data
-      const localUsers = result.value.users.map(u => LocalUserFactory.fromUser(u));
+      const localUsers = successResult.value.users.map(u => LocalUserFactory.fromUser(u));
       await this.localDataSource.saveUsers(localUsers);
 
       // Update memory cache
-      this.pageCache.put(page, result.value);
+      this.pageCache.put(page, successResult.value);
       this.pageCacheTimestamps.set(page, Date.now());
 
       // Cache individual users
-      result.value.users.forEach(u => this.userCache.put(u.id, u));
+      successResult.value.users.forEach(u => this.userCache.put(u.id, u));
 
-      this.logger.d(TAG, `Cached ${result.value.users.length} users for page ${page}`);
+      this.logger.d(TAG, `Cached ${successResult.value.users.length} users for page ${page}`);
     }
 
     return result;
@@ -402,7 +418,20 @@ export class UserRepositoryService implements IUserRepositoryService {
         } else if (status === SyncStatus.SYNCED) {
           updatedUser = LocalUserFactory.markAsSynced(user);
         } else {
-          updatedUser = { ...user, syncStatus: status, updatedAt: Date.now() };
+          updatedUser = new LocalUserImpl(
+            user.id,
+            user.email,
+            user.firstName,
+            user.lastName,
+            user.avatar,
+            status,
+            user.localId,
+            user.createdAt,
+            Date.now(),
+            user.syncAttempts,
+            user.syncError,
+            user.version
+          );
         }
         await this.localDataSource.saveUser(updatedUser);
       }
@@ -426,6 +455,44 @@ export class UserRepositoryService implements IUserRepositoryService {
 
   async setLastSyncTime(timestamp: number): Promise<void> {
     await this.localDataSource.setLastSyncTime(timestamp);
+  }
+
+  /**
+   * Subscribes to changes for a specific user (reactive updates)
+   */
+  subscribeToUser(userId: number, callback: (user: User | undefined) => void): ValueUnsubscribe<User> {
+    let callbackSet = this.userCallbacks.get(userId);
+    if (!callbackSet) {
+      callbackSet = new Set();
+      this.userCallbacks.set(userId, callbackSet);
+    }
+    callbackSet.add(callback);
+
+    // Immediately emit current cached value
+    const cached = this.userCache.get(userId);
+    try {
+      callback(cached);
+    } catch (error) {
+      this.logger.e(TAG, `Error in initial subscribeToUser callback: ${error}`);
+    }
+
+    return new ValueUnsubscribe(callback, callbackSet);
+  }
+
+  /**
+   * Notifies subscribers of user changes
+   */
+  private notifyUserSubscribers(userId: number, user: User | undefined): void {
+    const callbackSet = this.userCallbacks.get(userId);
+    if (callbackSet) {
+      callbackSet.forEach(callback => {
+        try {
+          callback(user);
+        } catch (error) {
+          this.logger.e(TAG, `Error in user subscriber callback: ${error}`);
+        }
+      });
+    }
   }
 
   // ===== Private Helpers =====
@@ -457,19 +524,14 @@ export class UserRepositoryService implements IUserRepositoryService {
       const startIndex = (page - 1) * ApiConfig.PAGE_SIZE;
       const pageUsers = filteredUsers.slice(startIndex, startIndex + ApiConfig.PAGE_SIZE);
 
-      const paginatedUsers: PaginatedUsers = {
-        users: pageUsers.map(lu => ({
-          id: lu.id,
-          email: lu.email,
-          firstName: lu.firstName,
-          lastName: lu.lastName,
-          avatar: lu.avatar
-        })),
+      const users: User[] = pageUsers.map(lu => new UserImpl(lu.id, lu.email, lu.firstName, lu.lastName, lu.avatar));
+      const paginatedUsers: PaginatedUsers = new PaginatedUsersImpl(
+        users,
         page,
-        perPage: ApiConfig.PAGE_SIZE,
-        total: filteredUsers.length,
-        totalPages: Math.ceil(filteredUsers.length / ApiConfig.PAGE_SIZE)
-      };
+        ApiConfig.PAGE_SIZE,
+        filteredUsers.length,
+        Math.ceil(filteredUsers.length / ApiConfig.PAGE_SIZE)
+      );
 
       this.logger.d(TAG, 'Returning local data');
       return ResultFactory.success(paginatedUsers);

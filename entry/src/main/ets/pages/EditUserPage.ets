@@ -2,7 +2,7 @@ import { router } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
 import { UserFormViewModel, UserFormState, UserFormInput, UserFormEffect } from '../presentation/viewmodel/UserFormViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
-import { ServiceLocator } from '../core/di/AppInitializer';
+import { getContainer } from '../core/di/AppContainer';
 import { LoadingView } from '../presentation/components/LoadingView';
 import { Logger } from '../core/logging/Logger';
 import { PhotoPicker } from '../core/utils/PhotoPicker';
@@ -68,8 +68,9 @@ struct EditUserPage {
     }
 
     try {
-      const repository = ServiceLocator.getUserRepository();
-      const analytics = ServiceLocator.getAnalyticsService();
+      const container = getContainer();
+      const repository = container.getUserRepository();
+      const analytics = container.getAnalyticsService();
 
       this.viewModel = new UserFormViewModel(repository, analytics, 'edit', userId);
 

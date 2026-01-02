@@ -70,8 +70,9 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       await this.dbManager.initialize(this.context);
       this.log('RDB data source initialized');
     } catch (error) {
-      this.logError(`Failed to initialize RDB data source: ${error}`);
-      throw error;
+      const message = `Failed to initialize RDB data source: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -236,8 +237,9 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
         this.log(`Inserted user: ${user.id}`);
       }
     } catch (error) {
-      this.logError(`Failed to save user ${user.id}: ${error}`);
-      throw error;
+      const message = `Failed to save user ${user.id}: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -263,8 +265,9 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
 
       this.log(`Saved ${users.length} users in transaction`);
     } catch (error) {
-      this.logError(`Failed to save users: ${error}`);
-      throw error;
+      const message = `Failed to save users: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -280,8 +283,9 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       const affectedRows = await store.delete(predicates);
       this.log(`Deleted user ${userId}, affected rows: ${affectedRows}`);
     } catch (error) {
-      this.logError(`Failed to delete user ${userId}: ${error}`);
-      throw error;
+      const message = `Failed to delete user ${userId}: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -302,8 +306,9 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
 
       this.log('Cleared all local data');
     } catch (error) {
-      this.logError(`Failed to clear data: ${error}`);
-      throw error;
+      const message = `Failed to clear data: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -336,8 +341,9 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       await store.update(values, predicates);
       this.log(`Updated sync status for user ${userId}: ${status}`);
     } catch (error) {
-      this.logError(`Failed to update sync status: ${error}`);
-      throw error;
+      const message = `Failed to update sync status: ${error}`;
+      this.logError(message);
+      throw new Error(message);
     }
   }
 
@@ -435,7 +441,8 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       local_id: user.localId,
       created_at: user.createdAt,
       updated_at: user.updatedAt,
-      sync_attempts: user.syncAttempts
+      sync_attempts: user.syncAttempts,
+      version: user.version
     };
 
     if (user.syncError !== undefined) {
@@ -486,6 +493,13 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       syncError = resultSet.getString(syncErrorIndex);
     }
 
+    // Handle version with default fallback for migration
+    let version = 1;
+    const versionIndex = resultSet.getColumnIndex(UserColumns.VERSION);
+    if (versionIndex >= 0 && !resultSet.isColumnNull(versionIndex)) {
+      version = resultSet.getLong(versionIndex);
+    }
+
     return new LocalUserImpl(
       id,
       email,
@@ -497,7 +511,8 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       createdAt,
       updatedAt,
       syncAttempts,
-      syncError
+      syncError,
+      version
     );
   }
 

@@ -1,6 +1,13 @@
 /**
  * Dependency Injection Container
- * InversifyJS-style IoC container for ArkTS
+ * Simplified IoC container for ArkTS compatibility
+ *
+ * ArkTS Limitations:
+ * - No constructor function types (new (...args) => T)
+ * - No Symbol API
+ * - No any/unknown types
+ *
+ * This implementation uses factory functions and constant values only.
  */
 
 import {
@@ -20,15 +27,6 @@ import {
   IAsyncContainerModule
 } from './types';
 
-import {
-  getInjectableMetadata,
-  getPropertyInjections,
-  isOptionalParam,
-  getMultiInjectIdentifier,
-  getPostConstructMethod,
-  getPreDestroyMethod
-} from './decorators';
-
 /**
  * Binding builder for fluent API
  */
@@ -47,14 +45,10 @@ class BindingBuilder<T> implements IBindingTo<T>, IBindingInWhen<T> {
   }
 
   /**
-   * Binds to a constructor/class
+   * Binds to a class/constructor (not supported in ArkTS - use toDynamicValue instead)
    */
-  to(constructor: new (...args: ESObject[]) => T): IBindingInWhen<T> {
-    this.binding.factory = (c: IContainer) => {
-      return this.createInstance(constructor, c);
-    };
-    this.container.registerBinding(this.binding);
-    return this;
+  to(_constructor: Object): IBindingInWhen<T> {
+    throw new Error('Constructor binding not supported in ArkTS. Use toDynamicValue() instead.');
   }
 
   /**
@@ -87,12 +81,10 @@ class BindingBuilder<T> implements IBindingTo<T>, IBindingInWhen<T> {
   }
 
   /**
-   * Binds to self (uses identifier as constructor)
+   * Binds to self (not supported in ArkTS)
    */
   toSelf(): IBindingInWhen<T> {
-    // Assumes identifier is a constructor
-    const constructor = this.binding.identifier as unknown as new (...args: ESObject[]) => T;
-    return this.to(constructor);
+    throw new Error('Self binding not supported in ArkTS. Use toDynamicValue() instead.');
   }
 
   /**
@@ -133,50 +125,6 @@ class BindingBuilder<T> implements IBindingTo<T>, IBindingInWhen<T> {
   done(): void {
     // No-op, binding already registered
   }
-
-  /**
-   * Creates an instance using constructor injection
-   */
-  private createInstance(constructor: new (...args: ESObject[]) => T, container: IContainer): T {
-    const metadata = getInjectableMetadata(constructor);
-    const args: ESObject[] = [];
-
-    if (metadata) {
-      // Resolve constructor dependencies
-      for (let i = 0; i < metadata.dependencies.length; i++) {
-        const identifier = metadata.dependencies[i];
-        if (identifier !== undefined) {
-          const multiInjectId = getMultiInjectIdentifier(constructor, i);
-          if (multiInjectId) {
-            // Multi-inject: get all bindings
-            args[i] = (container as Container).getAll(multiInjectId);
-          } else if (isOptionalParam(constructor, i)) {
-            // Optional dependency
-            args[i] = container.isBound(identifier) ? container.get(identifier) : undefined;
-          } else {
-            args[i] = container.get(identifier);
-          }
-        }
-      }
-    }
-
-    // Create instance
-    const instance = new constructor(...args);
-
-    // Property injection
-    const propertyInjections = getPropertyInjections(constructor);
-    for (const injection of propertyInjections) {
-      (instance as Record<string, ESObject>)[injection.propertyKey] = container.get(injection.identifier);
-    }
-
-    // Post-construct hook
-    const postConstruct = getPostConstructMethod(constructor);
-    if (postConstruct && typeof (instance as Record<string, ESObject>)[postConstruct] === 'function') {
-      ((instance as Record<string, ESObject>)[postConstruct] as Function)();
-    }
-
-    return instance;
-  }
 }
 
 /**
@@ -184,9 +132,9 @@ class BindingBuilder<T> implements IBindingTo<T>, IBindingInWhen<T> {
  * Manages service bindings and resolution
  */
 export class Container implements IContainer {
-  private bindings = new Map<ServiceIdentifier, Binding<ESObject>[]>();
-  private parent?: Container;
-  private requestScopeInstances = new Map<ServiceIdentifier, ESObject>();
+  private bindings = new Map<string, Binding<Object>[]>();
+  private parent: Container | undefined = undefined;
+  private requestScopeInstances = new Map<string, Object>();
 
   constructor(parent?: Container) {
     this.parent = parent;
@@ -208,7 +156,7 @@ export class Container implements IContainer {
       bindingList = [];
       this.bindings.set(binding.identifier, bindingList);
     }
-    bindingList.push(binding as Binding<ESObject>);
+    bindingList.push(binding as Binding<Object>);
   }
 
   /**
@@ -221,7 +169,7 @@ export class Container implements IContainer {
       if (this.parent) {
         return this.parent.get(identifier);
       }
-      throw new Error(`No binding found for: ${String(identifier)}`);
+      throw new Error(`No binding found for: ${identifier}`);
     }
 
     return this.resolveBinding(binding) as T;
@@ -237,7 +185,7 @@ export class Container implements IContainer {
       if (this.parent) {
         return this.parent.getAsync(identifier);
       }
-      throw new Error(`No binding found for: ${String(identifier)}`);
+      throw new Error(`No binding found for: ${identifier}`);
     }
 
     return this.resolveBindingAsync(binding) as Promise<T>;
@@ -333,15 +281,10 @@ export class Container implements IContainer {
     for (const bindingList of this.bindings.values()) {
       for (const binding of bindingList) {
         if (binding.instance) {
-          // Call pre-destroy if exists
-          const preDestroy = getPreDestroyMethod(binding.instance.constructor);
-          if (preDestroy && typeof (binding.instance as Record<string, ESObject>)[preDestroy] === 'function') {
-            await ((binding.instance as Record<string, ESObject>)[preDestroy] as Function)();
-          }
-
           // Call dispose if implements IDisposable
           if (this.isDisposable(binding.instance)) {
-            await binding.instance.dispose();
+            const disposable = binding.instance as IDisposable;
+            await disposable.dispose();
           }
 
           binding.instance = undefined;
@@ -377,9 +320,17 @@ export class Container implements IContainer {
   }
 
   private getAllBindings<T>(identifier: ServiceIdentifier<T>): Binding<T>[] {
-    const localBindings = (this.bindings.get(identifier) || []) as Binding<T>[];
-    const parentBindings = this.parent ? this.parent.getAllBindings(identifier) : [];
-    return [...parentBindings, ...localBindings];
+    const localBindingsRaw = this.bindings.get(identifier);
+    const localBindings: Binding<T>[] = localBindingsRaw ? localBindingsRaw as Binding<T>[] : [];
+    const parentBindings: Binding<T>[] = this.parent ? this.parent.getAllBindings(identifier) : [];
+    const result: Binding<T>[] = [];
+    for (const b of parentBindings) {
+      result.push(b);
+    }
+    for (const b of localBindings) {
+      result.push(b);
+    }
+    return result;
   }
 
   private resolveBinding<T>(binding: Binding<T>): T {
@@ -398,10 +349,10 @@ export class Container implements IContainer {
         }
         if (binding.factory) {
           const instance = binding.factory(this);
-          this.requestScopeInstances.set(binding.identifier, instance);
+          this.requestScopeInstances.set(binding.identifier, instance as Object);
           return instance;
         }
-        throw new Error(`No factory for request-scoped binding: ${String(binding.identifier)}`);
+        throw new Error(`No factory for request-scoped binding: ${binding.identifier}`);
 
       case BindingScope.TRANSIENT:
       default:
@@ -411,7 +362,7 @@ export class Container implements IContainer {
         if (binding.instance !== undefined) {
           return binding.instance;
         }
-        throw new Error(`No factory or instance for binding: ${String(binding.identifier)}`);
+        throw new Error(`No factory or instance for binding: ${binding.identifier}`);
     }
   }
 
@@ -439,9 +390,9 @@ export class Container implements IContainer {
         } else if (binding.factory) {
           instance = binding.factory(this);
         } else {
-          throw new Error(`No factory for request-scoped binding: ${String(binding.identifier)}`);
+          throw new Error(`No factory for request-scoped binding: ${binding.identifier}`);
         }
-        this.requestScopeInstances.set(binding.identifier, instance);
+        this.requestScopeInstances.set(binding.identifier, instance as Object);
         return instance;
 
       case BindingScope.TRANSIENT:
@@ -455,15 +406,16 @@ export class Container implements IContainer {
         if (binding.instance !== undefined) {
           return binding.instance;
         }
-        throw new Error(`No factory or instance for binding: ${String(binding.identifier)}`);
+        throw new Error(`No factory or instance for binding: ${binding.identifier}`);
     }
   }
 
-  private isDisposable(obj: unknown): obj is IDisposable {
-    return obj !== null &&
-           typeof obj === 'object' &&
-           'dispose' in obj &&
-           typeof (obj as IDisposable).dispose === 'function';
+  private isDisposable(obj: Object): boolean {
+    if (obj === null || typeof obj !== 'object') {
+      return false;
+    }
+    const disposable = obj as IDisposable;
+    return typeof disposable.dispose === 'function';
   }
 }
 

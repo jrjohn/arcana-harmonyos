@@ -2,7 +2,7 @@ import { router } from '@kit.ArkUI';
 import { User } from '../domain/models/User';
 import { UserListViewModel, UserListState, UserListInput, UserListEffect } from '../presentation/viewmodel/UserListViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
-import { ServiceLocator } from '../core/di/AppInitializer';
+import { getContainer } from '../core/di/AppContainer';
 import { UserCard } from '../presentation/components/UserCard';
 import { LoadingView, InlineLoading } from '../presentation/components/LoadingView';
 import { ErrorView } from '../presentation/components/ErrorView';
@@ -45,9 +45,10 @@ struct UserListPage {
     Logger.d(TAG, 'UserListPage appearing');
 
     try {
-      const repository = ServiceLocator.getUserRepository();
-      const syncManager = ServiceLocator.getSyncManager();
-      const analytics = ServiceLocator.getAnalyticsService();
+      const container = getContainer();
+      const repository = container.getUserRepository();
+      const syncManager = container.getSyncManager();
+      const analytics = container.getAnalyticsService();
 
       this.viewModel = new UserListViewModel(repository, syncManager, analytics);
 

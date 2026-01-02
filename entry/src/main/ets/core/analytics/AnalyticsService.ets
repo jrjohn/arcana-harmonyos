@@ -1,4 +1,5 @@
 import { Logger } from '../logging/Logger';
+import { IAnalyticsService } from '../di/interfaces';
 
 const TAG = 'AnalyticsService';
 
@@ -41,9 +42,16 @@ export class AnalyticsProps {
 }
 
 /**
+ * Interface for analytics timing
+ */
+export interface AnalyticsTimer {
+  end(): void;
+}
+
+/**
  * Timing callback class to avoid standalone this in closures
  */
-export class AnalyticsTimingCallback {
+export class AnalyticsTimingCallback implements AnalyticsTimer {
   private operationName: string;
   private startTime: number;
   private analyticsService: AnalyticsService;
@@ -95,7 +103,7 @@ export interface ScreenTrackingData {
  * Analytics service for tracking user behavior and app performance.
  * Follows the AOP pattern from the Android app with screen tracking.
  */
-export class AnalyticsService {
+export class AnalyticsService implements IAnalyticsService {
   private events: AnalyticsEvent[] = [];
   private currentScreen: ScreenTrackingData | null = null;
   private sessionId: string = '';

@@ -7,7 +7,9 @@ import { injectable, inject, preDestroy } from '../di/decorators';
 import { ISyncManager, IUserRepositoryService, INetworkMonitor, ILogger } from '../di/interfaces';
 import { TYPES } from '../di/tokens';
 import { LocalUser, SyncStatus, LocalUserFactory } from '../../domain/models/User';
-import { ResultFactory } from '../../domain/models/Result';
+import { ResultFactory, Success, Failure } from '../../domain/models/Result';
+import { User, LocalUser as LocalUserType } from '../../domain/models/User';
+import { AppError } from '../../domain/models/AppError';
 import { NetworkStatus } from '../network/NetworkMonitor';
 import { SyncState, SyncStateCallback } from './SyncManager';
 
@@ -178,10 +180,11 @@ export class SyncManagerService implements ISyncManager {
     });
 
     if (ResultFactory.isSuccess(result)) {
+      const successResult = result as Success<User>;
       await this.repository.deleteUserFromLocal(user.id);
-      const syncedUser = LocalUserFactory.markAsSynced(user, result.value.id);
+      const syncedUser = LocalUserFactory.markAsSynced(user, successResult.value.id);
       await this.repository.saveUserToLocal(syncedUser);
-      this.logger.d(TAG, `Created user synced with ID ${result.value.id}`);
+      this.logger.d(TAG, `Created user synced with ID ${successResult.value.id}`);
       return true;
     }
 
@@ -217,7 +220,8 @@ export class SyncManagerService implements ISyncManager {
       return true;
     }
 
-    if (result.error.code === 'E2001') {
+    const failureResult = result as Failure<AppError>;
+    if (failureResult.error.code === 'E2001') {
       await this.repository.deleteUserFromLocal(user.id);
       return true;
     }
@@ -239,7 +243,8 @@ export class SyncManagerService implements ISyncManager {
   private async updatePendingCount(): Promise<void> {
     const result = await this.repository.getPendingSyncUsers();
     if (ResultFactory.isSuccess(result)) {
-      this.updateState({ pendingCount: result.value.length });
+      const successResult = result as Success<LocalUser[]>;
+      this.updateState({ pendingCount: successResult.value.length });
     }
   }
 

@@ -1,7 +1,7 @@
 import { router } from '@kit.ArkUI';
 import { HomeViewModel, HomeState, HomeInput, HomeEffect } from '../presentation/viewmodel/HomeViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
-import { ServiceLocator } from '../core/di/AppInitializer';
+import { getContainer } from '../core/di/AppContainer';
 import { Logger } from '../core/logging/Logger';
 
 const TAG = 'HomePage';
@@ -39,8 +39,9 @@ struct HomePage {
     Logger.d(TAG, 'HomePage appearing');
 
     try {
-      const repository = ServiceLocator.getUserRepository();
-      const analytics = ServiceLocator.getAnalyticsService();
+      const container = getContainer();
+      const repository = container.getUserRepository();
+      const analytics = container.getAnalyticsService();
 
       this.viewModel = new HomeViewModel(repository, analytics);
 

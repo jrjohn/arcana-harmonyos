@@ -12,12 +12,15 @@ import {
 import { Result, Success, Failure } from '../../domain/models/Result';
 import { AppError, AppErrorFactory } from '../../domain/models/AppError';
 import { IUserRepository } from '../../domain/repository/IUserRepository';
+import { IUserRepositoryService } from '../../core/di/interfaces';
 import { UserApiService } from '../api/UserApiService';
 import { UserLocalDataSource } from '../local/UserLocalDataSource';
 import { LruCache } from '../cache/LruCache';
+import { ObservableCache, ValueUnsubscribe } from '../cache/ObservableCache';
 import { ApiConfig } from '../api/ApiConfig';
 import { Logger } from '../../core/logging/Logger';
 import { NetworkMonitor } from '../../core/network/NetworkMonitor';
+import { CacheEventBus } from '../../core/cache/CacheEventBus';
 
 const TAG = 'UserRepositoryImpl';
 
@@ -26,21 +29,31 @@ const TAG = 'UserRepositoryImpl';
  * The local database is the single source of truth.
  * Network data is used to sync and update the local cache.
  */
-export class UserRepositoryImpl implements IUserRepository {
+export class UserRepositoryImpl implements IUserRepository, IUserRepositoryService {
   private apiService: UserApiService;
   private localDataSource: UserLocalDataSource;
   private pageCache: LruCache<number, PaginatedUsers>;
-  private userCache: LruCache<number, User>;
+  private userCache: ObservableCache<number, User>;
   private pageCacheTimestamps: Map<number, number>;
 
   constructor(context: common.UIAbilityContext) {
     this.apiService = new UserApiService();
     this.localDataSource = new UserLocalDataSource(context);
     this.pageCache = new LruCache(20, ApiConfig.CACHE_TTL, 'pageCache');
-    this.userCache = new LruCache(100, ApiConfig.CACHE_TTL, 'userCache');
+    this.userCache = new ObservableCache(100, ApiConfig.CACHE_TTL, 'userCache');
     this.pageCacheTimestamps = new Map();
 
     Logger.d(TAG, 'UserRepository initialized');
+  }
+
+  /**
+   * Subscribes to changes for a specific user (like Android's getUserFlow)
+   * @param userId The user ID to observe
+   * @param callback Called when the user changes
+   * @returns Unsubscribe function
+   */
+  subscribeToUser(userId: number, callback: (user: User | undefined) => void): ValueUnsubscribe<User> {
+    return this.userCache.subscribeToKey(userId, callback);
   }
 
   /**
@@ -204,6 +217,7 @@ export class UserRepositoryImpl implements IUserRepository {
   invalidateAllCache(): void {
     this.pageCache.clear();
     this.pageCacheTimestamps.clear();
+    CacheEventBus.emitInvalidateAll();
     Logger.d(TAG, 'Invalidated all page caches');
   }
 
@@ -317,6 +331,33 @@ export class UserRepositoryImpl implements IUserRepository {
   }
 
   /**
+   * Searches users locally by query
+   */
+  async searchUsers(query: string): Promise<Result<User[], AppError>> {
+    Logger.d(TAG, `searchUsers query=${query}`);
+
+    const localResult = await this.getAllUsersFromLocal();
+    if (localResult.isFailure) {
+      return new Failure<AppError>((localResult as Failure<AppError>).error);
+    }
+
+    const successResult = localResult as Success<LocalUser[]>;
+    const lowerQuery = query.toLowerCase();
+    const filteredUsers: User[] = [];
+
+    for (const lu of successResult.value) {
+      if (lu.firstName.toLowerCase().includes(lowerQuery) ||
+          lu.lastName.toLowerCase().includes(lowerQuery) ||
+          lu.email.toLowerCase().includes(lowerQuery)) {
+        filteredUsers.push(UserImpl.create(lu.id, lu.email, lu.firstName, lu.lastName, lu.avatar));
+      }
+    }
+
+    Logger.d(TAG, `Found ${filteredUsers.length} users matching query`);
+    return new Success<User[]>(filteredUsers);
+  }
+
+  /**
    * Creates a user with optimistic update
    */
   async createUser(request: CreateUserRequest): Promise<Result<User, AppError>> {
@@ -346,6 +387,9 @@ export class UserRepositoryImpl implements IUserRepository {
         await this.saveUserToLocal(syncedUser);
         this.invalidateAllCache();
 
+        // Emit user created event
+        CacheEventBus.emitUserCreated(successNetworkResult.value.id);
+
         return networkResult;
       }
 
@@ -361,6 +405,9 @@ export class UserRepositoryImpl implements IUserRepository {
       pendingUser.lastName,
       pendingUser.avatar
     );
+
+    // Emit user created event for optimistic local creation
+    CacheEventBus.emitUserCreated(pendingUser.id);
 
     return new Success<User>(user);
   }
@@ -396,7 +443,8 @@ export class UserRepositoryImpl implements IUserRepository {
       currentUser.createdAt,
       Date.now(),
       currentUser.syncAttempts,
-      currentUser.syncError
+      currentUser.syncError,
+      currentUser.version + 1  // Increment version on update
     );
 
     await this.saveUserToLocal(updatedLocalUser);
@@ -415,6 +463,9 @@ export class UserRepositoryImpl implements IUserRepository {
         await this.saveUserToLocal(syncedUser);
         this.userCache.put(request.id, successNetworkResult.value);
 
+        // Emit user updated event
+        CacheEventBus.emitUserUpdated(request.id);
+
         return networkResult;
       }
 
@@ -429,6 +480,9 @@ export class UserRepositoryImpl implements IUserRepository {
       updatedLocalUser.lastName,
       updatedLocalUser.avatar
     );
+
+    // Emit user updated event for optimistic local update
+    CacheEventBus.emitUserUpdated(request.id);
 
     return new Success<User>(user);
   }
@@ -463,11 +517,18 @@ export class UserRepositoryImpl implements IUserRepository {
       if (networkResult.isSuccess) {
         // Actually delete from local
         await this.deleteUserFromLocal(userId);
+
+        // Emit user deleted event
+        CacheEventBus.emitUserDeleted(userId);
+
         return new Success<void>(undefined);
       }
 
       Logger.w(TAG, 'Network delete failed, user marked for deletion locally');
     }
+
+    // Emit user deleted event for optimistic local deletion
+    CacheEventBus.emitUserDeleted(userId);
 
     return new Success<void>(undefined);
   }

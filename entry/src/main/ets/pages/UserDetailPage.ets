@@ -2,7 +2,7 @@ import { router } from '@kit.ArkUI';
 import { User, UserFactory } from '../domain/models/User';
 import { UserDetailViewModel, UserDetailState, UserDetailInput, UserDetailEffect } from '../presentation/viewmodel/UserDetailViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
-import { ServiceLocator } from '../core/di/AppInitializer';
+import { getContainer } from '../core/di/AppContainer';
 import { LoadingView } from '../presentation/components/LoadingView';
 import { ErrorView } from '../presentation/components/ErrorView';
 import { Logger } from '../core/logging/Logger';
@@ -55,8 +55,9 @@ struct UserDetailPage {
     }
 
     try {
-      const repository = ServiceLocator.getUserRepository();
-      const analytics = ServiceLocator.getAnalyticsService();
+      const container = getContainer();
+      const repository = container.getUserRepository();
+      const analytics = container.getAnalyticsService();
 
       this.viewModel = new UserDetailViewModel(repository, analytics, userId);
 

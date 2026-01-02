@@ -1,11 +1,11 @@
 import { BaseViewModel, BaseInput, BaseState, BaseEffect } from './BaseViewModel';
 import { User, PaginatedUsers } from '../../domain/models/User';
-import { UserRepositoryImpl } from '../../data/repository/UserRepositoryImpl';
+import { IUserRepositoryService, ISyncManager, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { SyncUnsubscribeCallback, SyncState } from '../../core/sync/SyncManager';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
-import { SyncManager, SyncState, SyncUnsubscribeCallback } from '../../core/sync/SyncManager';
-import { AnalyticsService, AnalyticsTimingCallback, AnalyticsProps } from '../../core/analytics/AnalyticsService';
 import { NetworkMonitor, NetworkStatus, UnsubscribeCallback } from '../../core/network/NetworkMonitor';
+import { CacheEventBus, CacheEventType, EventUnsubscribe } from '../../core/cache/CacheEventBus';
 import { Logger } from '../../core/logging/Logger';
 
 const TAG = 'UserListViewModel';
@@ -132,16 +132,17 @@ export type UserListEffect =
  * Implements the Input/Output pattern for clean separation.
  */
 export class UserListViewModel extends BaseViewModel<UserListInput, UserListState, UserListEffect> {
-  private repository: UserRepositoryImpl;
-  private syncManager: SyncManager;
-  private analytics: AnalyticsService;
+  private repository: IUserRepositoryService;
+  private syncManager: ISyncManager;
+  private analytics: IAnalyticsService;
   private networkUnsubscribe: UnsubscribeCallback | null = null;
   private syncUnsubscribe: SyncUnsubscribeCallback | null = null;
+  private cacheEventUnsubscribe: EventUnsubscribe | null = null;
 
   constructor(
-    repository: UserRepositoryImpl,
-    syncManager: SyncManager,
-    analytics: AnalyticsService
+    repository: IUserRepositoryService,
+    syncManager: ISyncManager,
+    analytics: IAnalyticsService
   ) {
     super({
       isLoading: false,
@@ -186,6 +187,35 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
     this.syncUnsubscribe = this.syncManager.subscribe((state) => {
       this._state.syncState = state;
       this.notifyStateChangeInternal();
+    });
+
+    // Subscribe to cache events for auto-refresh
+    this.cacheEventUnsubscribe = CacheEventBus.subscribe((event) => {
+      Logger.d(TAG, `Cache event received: ${event.type}`);
+
+      switch (event.type) {
+        case CacheEventType.SYNC_COMPLETED:
+          // Auto-refresh when sync completes with changes
+          if (event.payload && event.payload.syncedCount && event.payload.syncedCount > 0) {
+            this.loadUsers(true);
+          }
+          break;
+
+        case CacheEventType.USER_CREATED:
+        case CacheEventType.USER_UPDATED:
+        case CacheEventType.USER_DELETED:
+        case CacheEventType.INVALIDATE_ALL:
+          // Refresh list when any user CRUD operation occurs
+          this.loadUsers(true);
+          break;
+
+        case CacheEventType.INVALIDATE_PAGE:
+          // Only refresh if current page is affected
+          if (event.payload && event.payload.page === this._state.currentPage) {
+            this.loadUsers(true);
+          }
+          break;
+      }
     });
   }
 
@@ -527,6 +557,9 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
     }
     if (this.syncUnsubscribe) {
       this.syncUnsubscribe.unsubscribe();
+    }
+    if (this.cacheEventUnsubscribe) {
+      this.cacheEventUnsubscribe.unsubscribe();
     }
     super.destroy();
   }

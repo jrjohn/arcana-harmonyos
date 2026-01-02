@@ -1,9 +1,8 @@
 import { BaseViewModel, BaseState, BaseEffect } from './BaseViewModel';
 import { User } from '../../domain/models/User';
-import { UserRepositoryImpl } from '../../data/repository/UserRepositoryImpl';
+import { IUserRepositoryService, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
-import { AnalyticsService, AnalyticsTimingCallback, AnalyticsProps } from '../../core/analytics/AnalyticsService';
 import { Logger } from '../../core/logging/Logger';
 
 const TAG = 'UserDetailViewModel';
@@ -98,12 +97,12 @@ export type UserDetailEffect =
  * ViewModel for the User Detail screen.
  */
 export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDetailState, UserDetailEffect> {
-  private repository: UserRepositoryImpl;
-  private analytics: AnalyticsService;
+  private repository: IUserRepositoryService;
+  private analytics: IAnalyticsService;
 
   constructor(
-    repository: UserRepositoryImpl,
-    analytics: AnalyticsService,
+    repository: IUserRepositoryService,
+    analytics: IAnalyticsService,
     userId: number
   ) {
     super({

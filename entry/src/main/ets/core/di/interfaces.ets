@@ -5,12 +5,15 @@
 
 import { common } from '@kit.AbilityKit';
 import { NetworkState, NetworkStatus, NetworkStateCallback } from '../network/NetworkMonitor';
-import { SyncState, SyncStateCallback } from '../sync/SyncManager';
+import { SyncState, SyncStateCallback, SyncUnsubscribeCallback } from '../sync/SyncManager';
 import { LogLevel } from '../logging/Logger';
-import { AnalyticsEvent } from '../analytics/AnalyticsService';
+import { AnalyticsEvent, AnalyticsProps, AnalyticsTimer } from '../analytics/AnalyticsService';
 import { User, CreateUserRequest, UpdateUserRequest, PaginatedUsers, LocalUser, SyncStatus } from '../../domain/models/User';
 import { Result } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
+import { ValueUnsubscribe } from '../../data/cache/ObservableCache';
+
+export { AnalyticsProps };
 
 // ===== Network Monitor Interface =====
 
@@ -116,9 +119,9 @@ export interface ILogger {
 export interface ISyncManager {
   /**
    * Subscribes to sync state changes
-   * @returns Unsubscribe function
+   * @returns Unsubscribe callback
    */
-  subscribe(callback: SyncStateCallback): () => void;
+  subscribe(callback: SyncStateCallback): SyncUnsubscribeCallback;
 
   /**
    * Gets current sync state
@@ -160,17 +163,17 @@ export interface IAnalyticsService {
   /**
    * Tracks a custom event
    */
-  trackEvent(name: string, properties?: Record<string, string | number | boolean>): void;
+  trackEvent(name: string, properties?: AnalyticsProps): void;
 
   /**
    * Tracks a user action
    */
-  trackAction(action: string, target: string, properties?: Record<string, string | number | boolean>): void;
+  trackAction(action: string, target: string, properties?: AnalyticsProps): void;
 
   /**
    * Tracks an error
    */
-  trackError(errorCode: string, errorMessage: string, properties?: Record<string, string | number | boolean>): void;
+  trackError(errorCode: string, errorMessage: string, properties?: AnalyticsProps): void;
 
   /**
    * Tracks a performance metric
@@ -179,9 +182,9 @@ export interface IAnalyticsService {
 
   /**
    * Creates a timing utility for measuring operations
-   * @returns Function to call when operation completes
+   * @returns Timer object with end() method
    */
-  startTiming(operationName: string): () => void;
+  startTiming(operationName: string): AnalyticsTimer;
 
   /**
    * Flushes queued events to the backend
@@ -320,6 +323,16 @@ export interface IUserRepositoryService {
    * Updates the last sync timestamp
    */
   setLastSyncTime(timestamp: number): Promise<void>;
+
+  // ===== Observable Operations =====
+
+  /**
+   * Subscribes to changes for a specific user (reactive updates)
+   * @param userId The user ID to observe
+   * @param callback Called when the user changes
+   * @returns Unsubscribe function
+   */
+  subscribeToUser(userId: number, callback: (user: User | undefined) => void): ValueUnsubscribe<User>;
 }
 
 // ===== Context Provider Interface =====

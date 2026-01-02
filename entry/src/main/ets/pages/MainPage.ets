@@ -3,7 +3,7 @@ import { User } from '../domain/models/User';
 import { HomeViewModel, HomeState, HomeInput, HomeEffect } from '../presentation/viewmodel/HomeViewModel';
 import { UserListViewModel, UserListState, UserListInput, UserListEffect } from '../presentation/viewmodel/UserListViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
-import { ServiceLocator } from '../core/di/AppInitializer';
+import { getContainer } from '../core/di/AppContainer';
 import { UserCard } from '../presentation/components/UserCard';
 import { LoadingView, InlineLoading } from '../presentation/components/LoadingView';
 import { ErrorView } from '../presentation/components/ErrorView';
@@ -81,8 +81,9 @@ struct MainPage {
 
   private initializeHomeViewModel(): void {
     try {
-      const repository = ServiceLocator.getUserRepository();
-      const analytics = ServiceLocator.getAnalyticsService();
+      const container = getContainer();
+      const repository = container.getUserRepository();
+      const analytics = container.getAnalyticsService();
 
       this.homeViewModel = new HomeViewModel(repository, analytics);
 
@@ -103,9 +104,10 @@ struct MainPage {
 
   private initializeUserListViewModel(): void {
     try {
-      const repository = ServiceLocator.getUserRepository();
-      const syncManager = ServiceLocator.getSyncManager();
-      const analytics = ServiceLocator.getAnalyticsService();
+      const container = getContainer();
+      const repository = container.getUserRepository();
+      const syncManager = container.getSyncManager();
+      const analytics = container.getAnalyticsService();
 
       this.userListViewModel = new UserListViewModel(repository, syncManager, analytics);
 

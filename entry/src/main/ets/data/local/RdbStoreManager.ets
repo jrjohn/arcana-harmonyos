@@ -47,7 +47,8 @@ export const UserColumns = {
   CREATED_AT: 'created_at',
   UPDATED_AT: 'updated_at',
   SYNC_ATTEMPTS: 'sync_attempts',
-  SYNC_ERROR: 'sync_error'
+  SYNC_ERROR: 'sync_error',
+  VERSION: 'version'
 };
 
 /**
@@ -73,7 +74,8 @@ const CREATE_USERS_TABLE = `
     ${UserColumns.CREATED_AT} INTEGER NOT NULL,
     ${UserColumns.UPDATED_AT} INTEGER NOT NULL,
     ${UserColumns.SYNC_ATTEMPTS} INTEGER DEFAULT 0,
-    ${UserColumns.SYNC_ERROR} TEXT
+    ${UserColumns.SYNC_ERROR} TEXT,
+    ${UserColumns.VERSION} INTEGER DEFAULT 1
   )
 `;
 

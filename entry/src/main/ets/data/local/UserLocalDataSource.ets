@@ -210,7 +210,8 @@ export class UserLocalDataSource {
             user.createdAt,
             Date.now(),
             user.syncAttempts,
-            user.syncError
+            user.syncError,
+            user.version
           );
         }
 

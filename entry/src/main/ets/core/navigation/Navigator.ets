@@ -1,12 +1,12 @@
 /**
  * Type-Safe Navigator
  * Handles all navigation operations with compile-time type safety
+ *
+ * Uses NavPathStack for navigation (recommended over deprecated router API)
  */
 
-import { router } from '@kit.ArkUI';
-import { injectable, inject, preDestroy } from '../di/decorators';
+import { injectable, preDestroy } from '../di/decorators';
 import { IAnalyticsService, ILogger } from '../di/interfaces';
-import { TYPES } from '../di/tokens';
 import {
   AppRoute,
   Routes,
@@ -48,6 +48,9 @@ export type NavigationCallback = (route: AppRoute) => void;
  * Navigator interface for DI
  */
 export interface INavigator {
+  /** Set the NavPathStack instance */
+  setNavPathStack(navPathStack: NavPathStack): void;
+
   /** Navigate to a route */
   navigate(route: AppRoute, options?: NavigationOptions): Promise<NavigationResult>;
 
@@ -74,7 +77,18 @@ export interface INavigator {
 }
 
 /**
- * Navigator implementation
+ * Navigation parameters for pages
+ */
+export class NavPageParam {
+  userId: number;
+
+  constructor(userId: number) {
+    this.userId = userId;
+  }
+}
+
+/**
+ * Navigator implementation using NavPathStack
  */
 @injectable()
 export class Navigator implements INavigator {
@@ -82,9 +96,16 @@ export class Navigator implements INavigator {
   private analytics?: IAnalyticsService;
   private callbacks: Set<NavigationCallback> = new Set();
   private currentRoute?: AppRoute;
-  private backStackDepth: number = 0;
+  private navPathStack?: NavPathStack;
 
   constructor() {}
+
+  /**
+   * Sets the NavPathStack instance from the Navigation component
+   */
+  setNavPathStack(navPathStack: NavPathStack): void {
+    this.navPathStack = navPathStack;
+  }
 
   /**
    * Sets dependencies (for manual injection)
@@ -97,22 +118,23 @@ export class Navigator implements INavigator {
   async navigate(route: AppRoute, options: NavigationOptions = {}): Promise<NavigationResult> {
     this.log(`Navigating to: ${route.type} (${route.url})`);
 
+    if (!this.navPathStack) {
+      this.logError('NavPathStack not set. Call setNavPathStack first.');
+      return { success: false, error: 'NavPathStack not initialized' };
+    }
+
     try {
-      const routerOptions: router.RouterOptions = {
-        url: route.path,
-        params: this.extractParams(route)
-      };
+      const pageName = this.getPageName(route.type);
+      const param = this.extractParam(route);
 
       if (options.clearStack) {
-        await router.clear();
-        this.backStackDepth = 0;
+        this.navPathStack.clear();
       }
 
       if (options.replace) {
-        await router.replaceUrl(routerOptions);
+        this.navPathStack.replacePath({ name: pageName, param: param });
       } else {
-        await router.pushUrl(routerOptions);
-        this.backStackDepth++;
+        this.navPathStack.pushPath({ name: pageName, param: param });
       }
 
       this.currentRoute = route;
@@ -129,9 +151,12 @@ export class Navigator implements INavigator {
   async back(): Promise<NavigationResult> {
     this.log('Navigating back');
 
+    if (!this.navPathStack) {
+      return { success: false, error: 'NavPathStack not initialized' };
+    }
+
     try {
-      await router.back();
-      this.backStackDepth = Math.max(0, this.backStackDepth - 1);
+      this.navPathStack.pop();
       return { success: true };
     } catch (error) {
       this.logError(`Back navigation failed: ${error}`);
@@ -142,14 +167,13 @@ export class Navigator implements INavigator {
   async backTo(routeType: RouteType): Promise<NavigationResult> {
     this.log(`Navigating back to: ${routeType}`);
 
-    try {
-      // Get the path for the route type
-      const path = this.getPathForRouteType(routeType);
-      if (!path) {
-        return { success: false, error: `Unknown route type: ${routeType}` };
-      }
+    if (!this.navPathStack) {
+      return { success: false, error: 'NavPathStack not initialized' };
+    }
 
-      await router.back({ url: path });
+    try {
+      const pageName = this.getPageName(routeType);
+      this.navPathStack.popToName(pageName);
       return { success: true };
     } catch (error) {
       this.logError(`Back to navigation failed: ${error}`);
@@ -166,7 +190,10 @@ export class Navigator implements INavigator {
   }
 
   canGoBack(): boolean {
-    return this.backStackDepth > 0;
+    if (!this.navPathStack) {
+      return false;
+    }
+    return this.navPathStack.size() > 1;
   }
 
   getCurrentRoute(): AppRoute | undefined {
@@ -207,29 +234,33 @@ export class Navigator implements INavigator {
 
   // ===== Private Helpers =====
 
-  private extractParams(route: AppRoute): Record<string, Object> {
-    if (route instanceof UserDetailRoute) {
-      return { userId: route.params.userId };
+  private getPageName(routeType: RouteType): string {
+    switch (routeType) {
+      case 'Main':
+        return 'MainPage';
+      case 'Home':
+        return 'HomePage';
+      case 'UserList':
+        return 'UserListPage';
+      case 'UserDetail':
+        return 'UserDetailPage';
+      case 'CreateUser':
+        return 'CreateUserPage';
+      case 'EditUser':
+        return 'EditUserPage';
+      default:
+        return 'HomePage';
     }
-    if (route instanceof EditUserRoute) {
-      return { userId: route.params.userId };
-    }
-    return {};
   }
 
-  private getPathForRouteType(routeType: RouteType): string | undefined {
-    switch (routeType) {
-      case 'UserList':
-        return 'pages/UserListPage';
-      case 'UserDetail':
-        return 'pages/UserDetailPage';
-      case 'CreateUser':
-        return 'pages/CreateUserPage';
-      case 'EditUser':
-        return 'pages/EditUserPage';
-      default:
-        return undefined;
+  private extractParam(route: AppRoute): NavPageParam | undefined {
+    if (route instanceof UserDetailRoute) {
+      return new NavPageParam(route.params.userId);
     }
+    if (route instanceof EditUserRoute) {
+      return new NavPageParam(route.params.userId);
+    }
+    return undefined;
   }
 
   private trackNavigation(route: AppRoute): void {
@@ -280,54 +311,27 @@ export class Navigator implements INavigator {
 // ===== Navigation Extensions =====
 
 /**
- * Navigation parameter extractor for pages
- * Use in aboutToAppear() to get typed parameters
+ * Navigation parameter extractor for pages using NavPathStack
+ * Use in onReady callback of NavDestination to get typed parameters
  */
 export class NavParams {
   /**
-   * Gets userId from navigation parameters
+   * Gets userId from NavPageParam
    */
-  static getUserId(): number | undefined {
-    try {
-      const params = router.getParams() as Record<string, Object> | undefined;
-      if (params && 'userId' in params) {
-        const userId = params['userId'];
-        if (typeof userId === 'number') {
-          return userId;
-        }
-        if (typeof userId === 'string') {
-          return parseInt(userId, 10);
-        }
-      }
-    } catch {
-      // Ignore errors
+  static getUserId(param: Object | undefined): number | undefined {
+    if (param instanceof NavPageParam) {
+      return param.userId;
     }
     return undefined;
   }
 
   /**
-   * Gets all navigation parameters
+   * Extracts NavPageParam from route param
    */
-  static getAll<T extends Record<string, Object>>(): T | undefined {
-    try {
-      return router.getParams() as T | undefined;
-    } catch {
-      return undefined;
+  static getPageParam(param: Object | undefined): NavPageParam | undefined {
+    if (param instanceof NavPageParam) {
+      return param;
     }
-  }
-
-  /**
-   * Gets a typed parameter by key
-   */
-  static get<T>(key: string, defaultValue?: T): T | undefined {
-    try {
-      const params = router.getParams() as Record<string, Object> | undefined;
-      if (params && key in params) {
-        return params[key] as T;
-      }
-    } catch {
-      // Ignore errors
-    }
-    return defaultValue;
+    return undefined;
   }
 }

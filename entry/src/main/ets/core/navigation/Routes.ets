@@ -29,9 +29,11 @@ export class EmptyParams implements RouteParams {
  * User detail route parameters
  */
 export class UserDetailParams implements RouteParams {
-  constructor(
-    public readonly userId: number
-  ) {}
+  readonly userId: number;
+
+  constructor(userId: number) {
+    this.userId = userId;
+  }
 
   toQueryString(): string {
     return `?userId=${this.userId}`;
@@ -50,9 +52,11 @@ export class UserDetailParams implements RouteParams {
  * Edit user route parameters
  */
 export class EditUserParams implements RouteParams {
-  constructor(
-    public readonly userId: number
-  ) {}
+  readonly userId: number;
+
+  constructor(userId: number) {
+    this.userId = userId;
+  }
 
   toQueryString(): string {
     return `?userId=${this.userId}`;
@@ -73,6 +77,8 @@ export class EditUserParams implements RouteParams {
  * Route type discriminator
  */
 export type RouteType =
+  | 'Main'
+  | 'Home'
   | 'UserList'
   | 'UserDetail'
   | 'CreateUser'
@@ -93,12 +99,38 @@ export interface Route<P extends RouteParams = EmptyParams> {
 }
 
 /**
- * User List Route (Home)
+ * Main Route (Entry point with bottom tabs)
+ */
+export class MainRoute implements Route<EmptyParams> {
+  readonly type: RouteType = 'Main';
+  readonly path: string = 'pages/MainPage';
+  readonly params: EmptyParams = new EmptyParams();
+
+  get url(): string {
+    return this.path;
+  }
+}
+
+/**
+ * Home Route (Home tab content)
+ */
+export class HomeRoute implements Route<EmptyParams> {
+  readonly type: RouteType = 'Home';
+  readonly path: string = 'pages/HomePage';
+  readonly params: EmptyParams = new EmptyParams();
+
+  get url(): string {
+    return this.path;
+  }
+}
+
+/**
+ * User List Route
  */
 export class UserListRoute implements Route<EmptyParams> {
   readonly type: RouteType = 'UserList';
-  readonly path = 'pages/UserListPage';
-  readonly params = new EmptyParams();
+  readonly path: string = 'pages/UserListPage';
+  readonly params: EmptyParams = new EmptyParams();
 
   get url(): string {
     return this.path;
@@ -110,9 +142,12 @@ export class UserListRoute implements Route<EmptyParams> {
  */
 export class UserDetailRoute implements Route<UserDetailParams> {
   readonly type: RouteType = 'UserDetail';
-  readonly path = 'pages/UserDetailPage';
+  readonly path: string = 'pages/UserDetailPage';
+  readonly params: UserDetailParams;
 
-  constructor(public readonly params: UserDetailParams) {}
+  constructor(params: UserDetailParams) {
+    this.params = params;
+  }
 
   get url(): string {
     return this.path + this.params.toQueryString();
@@ -128,8 +163,8 @@ export class UserDetailRoute implements Route<UserDetailParams> {
  */
 export class CreateUserRoute implements Route<EmptyParams> {
   readonly type: RouteType = 'CreateUser';
-  readonly path = 'pages/CreateUserPage';
-  readonly params = new EmptyParams();
+  readonly path: string = 'pages/CreateUserPage';
+  readonly params: EmptyParams = new EmptyParams();
 
   get url(): string {
     return this.path;
@@ -141,9 +176,12 @@ export class CreateUserRoute implements Route<EmptyParams> {
  */
 export class EditUserRoute implements Route<EditUserParams> {
   readonly type: RouteType = 'EditUser';
-  readonly path = 'pages/EditUserPage';
+  readonly path: string = 'pages/EditUserPage';
+  readonly params: EditUserParams;
 
-  constructor(public readonly params: EditUserParams) {}
+  constructor(params: EditUserParams) {
+    this.params = params;
+  }
 
   get url(): string {
     return this.path + this.params.toQueryString();
@@ -160,6 +198,8 @@ export class EditUserRoute implements Route<EditUserParams> {
  * Union of all routes for type-safe navigation
  */
 export type AppRoute =
+  | MainRoute
+  | HomeRoute
   | UserListRoute
   | UserDetailRoute
   | CreateUserRoute
@@ -168,32 +208,60 @@ export type AppRoute =
 // ===== Route Factory =====
 
 /**
- * Type-safe route factory
- * Provides compile-time checking for route creation
+ * Route factory interface
  */
-export const Routes = {
-  /** Navigate to user list (home) */
+interface RouteFactory {
+  main(): MainRoute;
+  home(): HomeRoute;
+  userList(): UserListRoute;
+  userDetail(userId: number): UserDetailRoute;
+  createUser(): CreateUserRoute;
+  editUser(userId: number): EditUserRoute;
+  fromPath(path: string, params?: Record<string, string>): AppRoute | undefined;
+}
+
+/**
+ * Type-safe route factory implementation
+ */
+class RouteFactoryImpl implements RouteFactory {
+  /** Navigate to main (entry with tabs) */
+  main(): MainRoute {
+    return new MainRoute();
+  }
+
+  /** Navigate to home */
+  home(): HomeRoute {
+    return new HomeRoute();
+  }
+
+  /** Navigate to user list */
   userList(): UserListRoute {
     return new UserListRoute();
-  },
+  }
 
   /** Navigate to user detail */
   userDetail(userId: number): UserDetailRoute {
     return UserDetailRoute.create(userId);
-  },
+  }
 
   /** Navigate to create user */
   createUser(): CreateUserRoute {
     return new CreateUserRoute();
-  },
+  }
 
   /** Navigate to edit user */
   editUser(userId: number): EditUserRoute {
     return EditUserRoute.create(userId);
-  },
+  }
 
   /** Parse route from URL path */
   fromPath(path: string, params?: Record<string, string>): AppRoute | undefined {
+    if (path.includes('MainPage')) {
+      return new MainRoute();
+    }
+    if (path.includes('HomePage')) {
+      return new HomeRoute();
+    }
     if (path.includes('UserListPage')) {
       return new UserListRoute();
     }
@@ -208,34 +276,72 @@ export const Routes = {
     }
     return undefined;
   }
-} as const;
+}
+
+export const Routes: RouteFactory = new RouteFactoryImpl();
 
 // ===== Route Type Guards =====
 
 /**
+ * Type guard for MainRoute
+ */
+export function isMainRoute(route: AppRoute): boolean {
+  return route.type === 'Main';
+}
+
+/**
+ * Type guard for HomeRoute
+ */
+export function isHomeRoute(route: AppRoute): boolean {
+  return route.type === 'Home';
+}
+
+/**
  * Type guard for UserListRoute
  */
-export function isUserListRoute(route: AppRoute): route is UserListRoute {
+export function isUserListRoute(route: AppRoute): boolean {
   return route.type === 'UserList';
 }
 
 /**
  * Type guard for UserDetailRoute
  */
-export function isUserDetailRoute(route: AppRoute): route is UserDetailRoute {
+export function isUserDetailRoute(route: AppRoute): boolean {
   return route.type === 'UserDetail';
 }
 
 /**
  * Type guard for CreateUserRoute
  */
-export function isCreateUserRoute(route: AppRoute): route is CreateUserRoute {
+export function isCreateUserRoute(route: AppRoute): boolean {
   return route.type === 'CreateUser';
 }
 
 /**
  * Type guard for EditUserRoute
  */
-export function isEditUserRoute(route: AppRoute): route is EditUserRoute {
+export function isEditUserRoute(route: AppRoute): boolean {
   return route.type === 'EditUser';
 }
+
+// ===== Screen Names for Analytics =====
+
+/**
+ * Maps route types to human-readable screen names
+ */
+class RouteScreenNamesImpl {
+  private screenNames: Map<RouteType, string> = new Map([
+    ['Main', 'Main'],
+    ['Home', 'Home'],
+    ['UserList', 'User List'],
+    ['UserDetail', 'User Detail'],
+    ['CreateUser', 'Create User'],
+    ['EditUser', 'Edit User']
+  ]);
+
+  get(routeType: RouteType): string {
+    return this.screenNames.get(routeType) || 'Unknown';
+  }
+}
+
+export const RouteScreenNames = new RouteScreenNamesImpl();

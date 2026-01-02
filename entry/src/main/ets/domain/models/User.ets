@@ -101,6 +101,25 @@ export interface PaginatedUsers {
 }
 
 /**
+ * PaginatedUsers class implementation for ArkTS compatibility
+ */
+export class PaginatedUsersImpl implements PaginatedUsers {
+  readonly users: User[];
+  readonly page: number;
+  readonly perPage: number;
+  readonly total: number;
+  readonly totalPages: number;
+
+  constructor(users: User[], page: number, perPage: number, total: number, totalPages: number) {
+    this.users = users;
+    this.page = page;
+    this.perPage = perPage;
+    this.total = total;
+    this.totalPages = totalPages;
+  }
+}
+
+/**
  * Sync status for offline-first operations
  */
 export enum SyncStatus {
@@ -121,6 +140,8 @@ export interface LocalUser extends User {
   readonly updatedAt: number;
   readonly syncAttempts: number;
   readonly syncError?: string;
+  /** Version for conflict resolution tie-breaking */
+  readonly version: number;
 }
 
 /**
@@ -138,6 +159,7 @@ export class LocalUserImpl implements LocalUser {
   readonly updatedAt: number;
   readonly syncAttempts: number;
   readonly syncError?: string;
+  readonly version: number;
 
   constructor(
     id: number,
@@ -150,7 +172,8 @@ export class LocalUserImpl implements LocalUser {
     createdAt: number,
     updatedAt: number,
     syncAttempts: number,
-    syncError?: string
+    syncError: string | undefined,
+    version: number
   ) {
     this.id = id;
     this.email = email;
@@ -163,6 +186,7 @@ export class LocalUserImpl implements LocalUser {
     this.updatedAt = updatedAt;
     this.syncAttempts = syncAttempts;
     this.syncError = syncError;
+    this.version = version;
   }
 
   static fromUser(user: User, syncStatus: SyncStatus = SyncStatus.SYNCED): LocalUser {
@@ -178,7 +202,8 @@ export class LocalUserImpl implements LocalUser {
       now,
       now,
       0,
-      undefined
+      undefined,
+      1  // Initial version
     );
   }
 
@@ -201,7 +226,8 @@ export class LocalUserImpl implements LocalUser {
       now,
       now,
       0,
-      undefined
+      undefined,
+      1  // Initial version
     );
   }
 
@@ -217,7 +243,8 @@ export class LocalUserImpl implements LocalUser {
       user.createdAt,
       Date.now(),
       user.syncAttempts,
-      user.syncError
+      user.syncError,
+      user.version + 1  // Increment version on update
     );
   }
 
@@ -233,7 +260,8 @@ export class LocalUserImpl implements LocalUser {
       user.createdAt,
       Date.now(),
       user.syncAttempts,
-      user.syncError
+      user.syncError,
+      user.version  // Preserve version on delete
     );
   }
 
@@ -249,7 +277,8 @@ export class LocalUserImpl implements LocalUser {
       user.createdAt,
       Date.now(),
       0,
-      undefined
+      undefined,
+      user.version  // Preserve version on sync
     );
   }
 
@@ -265,7 +294,8 @@ export class LocalUserImpl implements LocalUser {
       user.createdAt,
       Date.now(),
       user.syncAttempts + 1,
-      error
+      error,
+      user.version  // Preserve version on failure
     );
   }
 
@@ -291,7 +321,48 @@ export class LocalUserImpl implements LocalUser {
       user.createdAt,
       Date.now(),
       user.syncAttempts,
-      user.syncError
+      user.syncError,
+      user.version + 1  // Increment version on content update
+    );
+  }
+
+  /**
+   * Increments the version number for conflict resolution
+   */
+  static incrementVersion(user: LocalUser): LocalUser {
+    return new LocalUserImpl(
+      user.id,
+      user.email,
+      user.firstName,
+      user.lastName,
+      user.avatar,
+      user.syncStatus,
+      user.localId,
+      user.createdAt,
+      Date.now(),
+      user.syncAttempts,
+      user.syncError,
+      user.version + 1
+    );
+  }
+
+  /**
+   * Creates a LocalUser from remote data, preserving local metadata
+   */
+  static fromRemote(remote: User, existingLocal: LocalUser): LocalUser {
+    return new LocalUserImpl(
+      remote.id,
+      remote.email,
+      remote.firstName,
+      remote.lastName,
+      remote.avatar,
+      SyncStatus.SYNCED,
+      existingLocal.localId,
+      existingLocal.createdAt,
+      Date.now(),
+      0,
+      undefined,
+      existingLocal.version  // Preserve local version when accepting remote
     );
   }
 }
@@ -314,5 +385,50 @@ export class UserFactory {
 
   static getInitials(user: User): string {
     return UserImpl.getInitials(user);
+  }
+}
+
+/**
+ * Factory utility for LocalUser operations (alias for LocalUserImpl static methods)
+ */
+export class LocalUserFactory {
+  static fromUser(user: User, syncStatus: SyncStatus = SyncStatus.SYNCED): LocalUser {
+    return LocalUserImpl.fromUser(user, syncStatus);
+  }
+
+  static createPending(email: string, firstName: string, lastName: string, avatar: string): LocalUser {
+    return LocalUserImpl.createPending(email, firstName, lastName, avatar);
+  }
+
+  static markForUpdate(user: LocalUser): LocalUser {
+    return LocalUserImpl.markForUpdate(user);
+  }
+
+  static markForDeletion(user: LocalUser): LocalUser {
+    return LocalUserImpl.markForDeletion(user);
+  }
+
+  static markAsSynced(user: LocalUser, serverId?: number): LocalUser {
+    return LocalUserImpl.markAsSynced(user, serverId);
+  }
+
+  static markSyncFailed(user: LocalUser, error: string): LocalUser {
+    return LocalUserImpl.markSyncFailed(user, error);
+  }
+
+  static needsSync(user: LocalUser): boolean {
+    return LocalUserImpl.needsSync(user);
+  }
+
+  static copyWithUpdates(user: LocalUser, email: string, firstName: string, lastName: string, avatar: string): LocalUser {
+    return LocalUserImpl.copyWithUpdates(user, email, firstName, lastName, avatar);
+  }
+
+  static incrementVersion(user: LocalUser): LocalUser {
+    return LocalUserImpl.incrementVersion(user);
+  }
+
+  static fromRemote(remote: User, existingLocal: LocalUser): LocalUser {
+    return LocalUserImpl.fromRemote(remote, existingLocal);
   }
 }

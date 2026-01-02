@@ -1,10 +1,9 @@
 import { BaseViewModel, BaseState, BaseEffect } from './BaseViewModel';
 import { User, CreateUserRequest, UpdateUserRequest } from '../../domain/models/User';
-import { UserRepositoryImpl } from '../../data/repository/UserRepositoryImpl';
+import { IUserRepositoryService, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
 import { UserValidator, UserValidationResult } from '../../domain/validators/UserValidator';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
-import { AnalyticsService, AnalyticsTimingCallback, AnalyticsProps } from '../../core/analytics/AnalyticsService';
 import { Logger } from '../../core/logging/Logger';
 
 const TAG = 'UserFormViewModel';
@@ -113,12 +112,12 @@ export type UserFormEffect =
  * Handles form validation and submission.
  */
 export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormState, UserFormEffect> {
-  private repository: UserRepositoryImpl;
-  private analytics: AnalyticsService;
+  private repository: IUserRepositoryService;
+  private analytics: IAnalyticsService;
 
   constructor(
-    repository: UserRepositoryImpl,
-    analytics: AnalyticsService,
+    repository: IUserRepositoryService,
+    analytics: IAnalyticsService,
     mode: 'create' | 'edit' = 'create',
     userId?: number
   ) {

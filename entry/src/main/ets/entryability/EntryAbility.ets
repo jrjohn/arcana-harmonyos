@@ -1,7 +1,7 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import { AppInitializer, ServiceLocator } from '../core/di/AppInitializer';
+import { AppInitializer } from '../core/di/AppInitializer';
 
 const TAG = 'EntryAbility';
 const DOMAIN = 0x0000;
@@ -16,9 +16,6 @@ export default class EntryAbility extends UIAbility {
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, 'Ability onCreate');
-
-    // Set context for service locator
-    ServiceLocator.setContext(this.context);
 
     // Initialize application dependencies (start async initialization)
     this.appInitializer = AppInitializer.getInstance(this.context);

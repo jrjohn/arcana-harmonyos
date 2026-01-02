@@ -41,6 +41,20 @@ export type Result<T, E = Error> = Success<T> | Failure<E>;
  */
 export class ResultFactory {
   /**
+   * Checks if a result is successful
+   */
+  static isSuccess<T, E>(result: Result<T, E>): boolean {
+    return result.isSuccess;
+  }
+
+  /**
+   * Checks if a result is a failure
+   */
+  static isFailure<T, E>(result: Result<T, E>): boolean {
+    return result.isFailure;
+  }
+
+  /**
    * Creates a successful result
    */
   static success<T>(value: T): Success<T> {

@@ -2,164 +2,151 @@
  * Dependency Injection Tokens
  * Service identifiers for all injectable services
  *
- * Using symbols for type-safe dependency identification
- * Similar to InversifyJS TYPES pattern
+ * Using string identifiers for ArkTS compatibility
+ * (ArkTS does not support Symbol API or "as const")
  */
+
+/**
+ * Service tokens interface for type safety
+ */
+export interface ServiceTokens {
+  // Core Services
+  ContextProvider: string;
+  Logger: string;
+  NetworkMonitor: string;
+  SyncManager: string;
+  AnalyticsService: string;
+
+  // Data Layer
+  UserRepository: string;
+  UserApiService: string;
+  UserLocalDataSource: string;
+
+  // Cache
+  PageCache: string;
+  UserCache: string;
+
+  // Domain Services
+  UserValidator: string;
+  UserService: string;
+
+  // Presentation
+  UserListViewModel: string;
+  UserDetailViewModel: string;
+  UserFormViewModel: string;
+
+  // Navigation
+  Navigator: string;
+
+  // Infrastructure
+  HttpClient: string;
+  PreferencesStorage: string;
+  SecureStorage: string;
+  WorkScheduler: string;
+}
 
 /**
  * Service tokens for dependency injection
- *
- * Usage:
- * ```
- * // Binding
- * container.bind(TYPES.Logger).to(LoggerImpl).inSingletonScope();
- *
- * // Injection
- * @injectable()
- * class MyService {
- *   constructor(@inject(TYPES.Logger) private logger: ILogger) {}
- * }
- *
- * // Resolution
- * const logger = container.get<ILogger>(TYPES.Logger);
- * ```
  */
-export const TYPES = {
-  // ===== Core Services =====
+class ServiceTokensImpl implements ServiceTokens {
+  // Core Services
+  readonly ContextProvider: string = 'ContextProvider';
+  readonly Logger: string = 'Logger';
+  readonly NetworkMonitor: string = 'NetworkMonitor';
+  readonly SyncManager: string = 'SyncManager';
+  readonly AnalyticsService: string = 'AnalyticsService';
 
-  /** Application context provider */
-  ContextProvider: Symbol.for('ContextProvider'),
+  // Data Layer
+  readonly UserRepository: string = 'UserRepository';
+  readonly UserApiService: string = 'UserApiService';
+  readonly UserLocalDataSource: string = 'UserLocalDataSource';
 
-  /** Logging service */
-  Logger: Symbol.for('Logger'),
+  // Cache
+  readonly PageCache: string = 'PageCache';
+  readonly UserCache: string = 'UserCache';
 
-  /** Network monitoring service */
-  NetworkMonitor: Symbol.for('NetworkMonitor'),
+  // Domain Services
+  readonly UserValidator: string = 'UserValidator';
+  readonly UserService: string = 'UserService';
 
-  /** Synchronization manager */
-  SyncManager: Symbol.for('SyncManager'),
+  // Presentation
+  readonly UserListViewModel: string = 'UserListViewModel';
+  readonly UserDetailViewModel: string = 'UserDetailViewModel';
+  readonly UserFormViewModel: string = 'UserFormViewModel';
 
-  /** Analytics service */
-  AnalyticsService: Symbol.for('AnalyticsService'),
+  // Navigation
+  readonly Navigator: string = 'Navigator';
 
-  // ===== Data Layer =====
+  // Infrastructure
+  readonly HttpClient: string = 'HttpClient';
+  readonly PreferencesStorage: string = 'PreferencesStorage';
+  readonly SecureStorage: string = 'SecureStorage';
+  readonly WorkScheduler: string = 'WorkScheduler';
+}
 
-  /** User repository (main data access) */
-  UserRepository: Symbol.for('UserRepository'),
-
-  /** User API service (network layer) */
-  UserApiService: Symbol.for('UserApiService'),
-
-  /** User local data source (persistence layer) */
-  UserLocalDataSource: Symbol.for('UserLocalDataSource'),
-
-  // ===== Cache =====
-
-  /** Page cache for paginated results */
-  PageCache: Symbol.for('PageCache'),
-
-  /** User cache for individual users */
-  UserCache: Symbol.for('UserCache'),
-
-  // ===== Domain Services =====
-
-  /** User validation service */
-  UserValidator: Symbol.for('UserValidator'),
-
-  /** User service (business logic) */
-  UserService: Symbol.for('UserService'),
-
-  // ===== Presentation =====
-
-  /** User list view model */
-  UserListViewModel: Symbol.for('UserListViewModel'),
-
-  /** User detail view model */
-  UserDetailViewModel: Symbol.for('UserDetailViewModel'),
-
-  /** User form view model */
-  UserFormViewModel: Symbol.for('UserFormViewModel'),
-
-  // ===== Navigation =====
-
-  /** Type-safe navigator */
-  Navigator: Symbol.for('Navigator'),
-
-  // ===== Infrastructure =====
-
-  /** HTTP client */
-  HttpClient: Symbol.for('HttpClient'),
-
-  /** Preferences storage */
-  PreferencesStorage: Symbol.for('PreferencesStorage'),
-
-  /** Secure storage (encrypted) */
-  SecureStorage: Symbol.for('SecureStorage'),
-
-  /** Work scheduler for background tasks */
-  WorkScheduler: Symbol.for('WorkScheduler'),
-} as const;
+export const TYPES: ServiceTokens = new ServiceTokensImpl();
 
 /**
- * Type helper for extracting token type
+ * Named binding identifiers interface
  */
-export type TokenType = typeof TYPES;
-export type TokenKey = keyof TokenType;
-export type TokenValue = TokenType[TokenKey];
+export interface NamedTokens {
+  FileLogger: string;
+  ConsoleLogger: string;
+  RemoteLogger: string;
+  MemoryCache: string;
+  DiskCache: string;
+  UserStorage: string;
+  SettingsStorage: string;
+}
+
+class NamedTokensImpl implements NamedTokens {
+  readonly FileLogger: string = 'FileLogger';
+  readonly ConsoleLogger: string = 'ConsoleLogger';
+  readonly RemoteLogger: string = 'RemoteLogger';
+  readonly MemoryCache: string = 'MemoryCache';
+  readonly DiskCache: string = 'DiskCache';
+  readonly UserStorage: string = 'UserStorage';
+  readonly SettingsStorage: string = 'SettingsStorage';
+}
+
+export const NAMED: NamedTokens = new NamedTokensImpl();
 
 /**
- * Named binding identifiers
- * Used with @named decorator for multiple bindings of same type
+ * Tag identifiers interface
  */
-export const NAMED = {
-  // Logger variants
-  FileLogger: 'FileLogger',
-  ConsoleLogger: 'ConsoleLogger',
-  RemoteLogger: 'RemoteLogger',
+export interface TagTokens {
+  Development: string;
+  Production: string;
+  Testing: string;
+  Mock: string;
+}
 
-  // Cache variants
-  MemoryCache: 'MemoryCache',
-  DiskCache: 'DiskCache',
+class TagTokensImpl implements TagTokens {
+  readonly Development: string = 'development';
+  readonly Production: string = 'production';
+  readonly Testing: string = 'testing';
+  readonly Mock: string = 'mock';
+}
 
-  // Storage variants
-  UserStorage: 'UserStorage',
-  SettingsStorage: 'SettingsStorage',
-} as const;
+export const TAGS: TagTokens = new TagTokensImpl();
 
 /**
- * Tag identifiers for conditional bindings
- * Used with @tagged decorator
+ * Module identifiers interface
  */
-export const TAGS = {
-  /** Development environment */
-  Development: 'development',
+export interface ModuleTokens {
+  Core: string;
+  Data: string;
+  Domain: string;
+  Presentation: string;
+  Testing: string;
+}
 
-  /** Production environment */
-  Production: 'production',
+class ModuleTokensImpl implements ModuleTokens {
+  readonly Core: string = 'CoreModule';
+  readonly Data: string = 'DataModule';
+  readonly Domain: string = 'DomainModule';
+  readonly Presentation: string = 'PresentationModule';
+  readonly Testing: string = 'TestingModule';
+}
 
-  /** Testing environment */
-  Testing: 'testing',
-
-  /** Mock implementation */
-  Mock: 'mock',
-} as const;
-
-/**
- * Module identifiers for container modules
- */
-export const MODULES = {
-  /** Core services module */
-  Core: 'CoreModule',
-
-  /** Data layer module */
-  Data: 'DataModule',
-
-  /** Domain layer module */
-  Domain: 'DomainModule',
-
-  /** Presentation layer module */
-  Presentation: 'PresentationModule',
-
-  /** Testing module (mocks) */
-  Testing: 'TestingModule',
-} as const;
+export const MODULES: ModuleTokens = new ModuleTokensImpl();
