@@ -242,12 +242,19 @@ struct UserDetailPage {
 
   private showDeleteDialog(): void {
     try {
+      const resourceMgr = this.getUIContext().getHostContext()?.resourceManager;
+      if (!resourceMgr) return;
+      const deleteTitle = resourceMgr.getStringSync($r('app.string.delete').id);
+      const confirmMsg = resourceMgr.getStringSync($r('app.string.confirm_delete_message').id);
+      const cancelText = resourceMgr.getStringSync($r('app.string.cancel').id);
+      const deleteText = resourceMgr.getStringSync($r('app.string.delete').id);
+
       this.getUIContext().getPromptAction().showDialog({
-        title: 'Delete User',
-        message: 'Are you sure you want to delete this user? This action cannot be undone.',
+        title: deleteTitle,
+        message: confirmMsg,
         buttons: [
-          { text: 'Cancel', color: '#6B7280' },
-          { text: 'Delete', color: '#DC2626' }
+          { text: cancelText, color: '#6B7280' },
+          { text: deleteText, color: '#DC2626' }
         ]
       }).then((result) => {
         if (result.index === 1) {
@@ -262,7 +269,7 @@ struct UserDetailPage {
   }
 
   @Builder
-  private BuildInfoCard(icon: Resource, label: string, value: string) {
+  private BuildInfoCardWithResource(icon: Resource, labelResource: Resource, value: string) {
     Row() {
       Image(icon)
         .width(24)
@@ -270,7 +277,7 @@ struct UserDetailPage {
         .fillColor('#7C3AED')
 
       Column() {
-        Text(label)
+        Text(labelResource)
           .fontSize(12)
           .fontColor('#6B7280')
 
@@ -293,7 +300,7 @@ struct UserDetailPage {
   build() {
     Column() {
       if (this.state.isLoading) {
-        LoadingView({ message: 'Loading user...' })
+        LoadingView({ messageResource: $r('app.string.loading_user') })
       } else if (this.state.error) {
         ErrorView({
           message: this.state.error,
@@ -308,34 +315,34 @@ struct UserDetailPage {
 
             // User details
             Column() {
-              Text('User Information')
+              Text($r('app.string.user_information'))
                 .fontSize(18)
                 .fontWeight(FontWeight.Bold)
                 .fontColor('#1F2937')
                 .width('100%')
                 .margin({ bottom: 16 })
 
-              this.BuildInfoCard(
+              this.BuildInfoCardWithResource(
                 $r('sys.media.ohos_ic_public_email'),
-                'Email',
+                $r('app.string.email'),
                 this.state.user?.email ?? ''
               )
 
-              this.BuildInfoCard(
+              this.BuildInfoCardWithResource(
                 $r('sys.media.ohos_ic_public_arrow_right'),
-                'First Name',
+                $r('app.string.first_name'),
                 this.state.user?.firstName ?? ''
               )
 
-              this.BuildInfoCard(
+              this.BuildInfoCardWithResource(
                 $r('sys.media.ohos_ic_public_arrow_right'),
-                'Last Name',
+                $r('app.string.last_name'),
                 this.state.user?.lastName ?? ''
               )
 
-              this.BuildInfoCard(
+              this.BuildInfoCardWithResource(
                 $r('sys.media.ohos_ic_public_arrow_right'),
-                'User ID',
+                $r('app.string.user_id'),
                 this.state.user?.id.toString() ?? ''
               )
             }
@@ -357,7 +364,7 @@ struct UserDetailPage {
               .height(48)
               .color(Color.White)
 
-            Text('Deleting...')
+            Text($r('app.string.deleting'))
               .fontSize(16)
               .fontColor(Color.White)
               .margin({ top: 16 })

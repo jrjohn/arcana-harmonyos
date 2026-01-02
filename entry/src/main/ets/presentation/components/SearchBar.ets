@@ -1,10 +1,11 @@
 /**
- * Search bar component.
+ * Search bar component with localization support.
  */
 @Component
 export struct SearchBar {
   @Link searchText: string;
-  @Prop placeholder: string = 'Search...';
+  @Prop placeholder: string = '';
+  placeholderResource?: Resource;
   onTextChange: (text: string) => void = () => {};
   onClear: () => void = () => {};
 
@@ -17,20 +18,36 @@ export struct SearchBar {
         .fillColor('#9CA3AF')
         .margin({ left: 12 })
 
-      // Text input
-      TextInput({ text: this.searchText, placeholder: this.placeholder })
-        .layoutWeight(1)
-        .height(40)
-        .backgroundColor(Color.Transparent)
-        .placeholderColor('#9CA3AF')
-        .placeholderFont({ size: 16 })
-        .fontSize(16)
-        .fontColor('#1F2937')
-        .padding({ left: 8, right: 8 })
-        .onChange((value: string) => {
-          this.searchText = value;
-          this.onTextChange(value);
-        })
+      // Text input - use resource if provided, otherwise fallback to string
+      if (this.placeholderResource) {
+        TextInput({ text: this.searchText, placeholder: this.placeholderResource })
+          .layoutWeight(1)
+          .height(40)
+          .backgroundColor(Color.Transparent)
+          .placeholderColor('#9CA3AF')
+          .placeholderFont({ size: 16 })
+          .fontSize(16)
+          .fontColor('#1F2937')
+          .padding({ left: 8, right: 8 })
+          .onChange((value: string) => {
+            this.searchText = value;
+            this.onTextChange(value);
+          })
+      } else {
+        TextInput({ text: this.searchText, placeholder: this.placeholder || 'Search...' })
+          .layoutWeight(1)
+          .height(40)
+          .backgroundColor(Color.Transparent)
+          .placeholderColor('#9CA3AF')
+          .placeholderFont({ size: 16 })
+          .fontSize(16)
+          .fontColor('#1F2937')
+          .padding({ left: 8, right: 8 })
+          .onChange((value: string) => {
+            this.searchText = value;
+            this.onTextChange(value);
+          })
+      }
 
       // Clear button
       if (this.searchText.length > 0) {

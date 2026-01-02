@@ -1,8 +1,10 @@
 import { router } from '@kit.ArkUI';
+import { common } from '@kit.AbilityKit';
 import { UserFormViewModel, UserFormState, UserFormInput, UserFormEffect } from '../presentation/viewmodel/UserFormViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
 import { ServiceLocator } from '../core/di/AppInitializer';
 import { Logger } from '../core/logging/Logger';
+import { PhotoPicker } from '../core/utils/PhotoPicker';
 
 const TAG = 'CreateUserPage';
 
@@ -120,12 +122,19 @@ struct CreateUserPage {
 
   private showUnsavedChangesDialog(): void {
     try {
+      const resourceMgr = this.getUIContext().getHostContext()?.resourceManager;
+      if (!resourceMgr) return;
+      const title = resourceMgr.getStringSync($r('app.string.unsaved_changes').id);
+      const message = resourceMgr.getStringSync($r('app.string.unsaved_changes_message').id);
+      const stayText = resourceMgr.getStringSync($r('app.string.stay').id);
+      const leaveText = resourceMgr.getStringSync($r('app.string.leave').id);
+
       this.getUIContext().getPromptAction().showDialog({
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes. Are you sure you want to leave?',
+        title: title,
+        message: message,
         buttons: [
-          { text: 'Stay', color: '#7C3AED' },
-          { text: 'Leave', color: '#DC2626' }
+          { text: stayText, color: '#7C3AED' },
+          { text: leaveText, color: '#DC2626' }
         ]
       }).then((result) => {
         if (result.index === 1) {
@@ -147,24 +156,44 @@ struct CreateUserPage {
     this.viewModel?.onEvent(input);
   }
 
+  private async pickAvatar(): Promise<void> {
+    try {
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      if (!context) {
+        Logger.e(TAG, 'Failed to get context for photo picker');
+        return;
+      }
+
+      const result = await PhotoPicker.pickPhoto(context);
+      if (result.success && result.uri) {
+        Logger.d(TAG, `Avatar selected: ${result.uri}`);
+        this.sendEvent({ type: 'UpdateAvatar', value: result.uri });
+      } else if (result.error) {
+        Logger.w(TAG, `Photo picker error: ${result.error}`);
+      }
+    } catch (error) {
+      Logger.e(TAG, `Failed to pick avatar: ${error}`);
+    }
+  }
+
   @Builder
-  private BuildTextField(
-    label: string,
+  private BuildTextFieldWithResource(
+    labelResource: Resource,
     value: string,
-    placeholder: string,
+    placeholderResource: Resource,
     error: string | undefined,
     inputType: InputType,
     onValueChange: (value: string) => void,
     onBlur: () => void
   ) {
     Column() {
-      Text(label)
+      Text(labelResource)
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor('#374151')
         .margin({ bottom: 8 })
 
-      TextInput({ text: value, placeholder: placeholder })
+      TextInput({ text: value, placeholder: placeholderResource })
         .width('100%')
         .height(48)
         .backgroundColor(Color.White)
@@ -214,7 +243,7 @@ struct CreateUserPage {
         .height(40)
         .onClick(() => this.sendEvent({ type: 'Cancel' }))
 
-        Text('Create User')
+        Text($r('app.string.create_user'))
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
           .fontColor('#1F2937')
@@ -229,28 +258,48 @@ struct CreateUserPage {
       // Form
       Scroll() {
         Column() {
-          // Avatar placeholder
+          // Avatar picker
           Column() {
             Stack({ alignContent: Alignment.Center }) {
-              if (this.state.avatar && this.state.avatar.length > 0) {
-                Image(this.state.avatar)
-                  .width(100)
-                  .height(100)
-                  .borderRadius(50)
-                  .objectFit(ImageFit.Cover)
-              } else {
-                Text(this.getInitials())
-                  .fontSize(32)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(Color.White)
+              // Avatar image or initials
+              Stack({ alignContent: Alignment.Center }) {
+                if (this.state.avatar && this.state.avatar.length > 0) {
+                  Image(this.state.avatar)
+                    .width(100)
+                    .height(100)
+                    .borderRadius(50)
+                    .objectFit(ImageFit.Cover)
+                } else {
+                  Text(this.getInitials())
+                    .fontSize(32)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(Color.White)
+                }
               }
+              .width(100)
+              .height(100)
+              .borderRadius(50)
+              .backgroundColor('#7C3AED')
+
+              // Camera icon overlay
+              Stack({ alignContent: Alignment.Center }) {
+                Image($r('sys.media.ohos_ic_public_camera'))
+                  .width(16)
+                  .height(16)
+                  .fillColor(Color.White)
+              }
+              .width(32)
+              .height(32)
+              .borderRadius(16)
+              .backgroundColor('#7C3AED')
+              .border({ width: 2, color: Color.White })
+              .position({ x: 68, y: 68 })
             }
             .width(100)
             .height(100)
-            .borderRadius(50)
-            .backgroundColor('#7C3AED')
+            .onClick(() => this.pickAvatar())
 
-            Text('User Avatar')
+            Text($r('app.string.tap_to_change_avatar'))
               .fontSize(14)
               .fontColor('#6B7280')
               .margin({ top: 8 })
@@ -261,10 +310,10 @@ struct CreateUserPage {
 
           // Form fields
           Column() {
-            this.BuildTextField(
-              'First Name',
+            this.BuildTextFieldWithResource(
+              $r('app.string.first_name'),
               this.firstNameInput,
-              'Enter first name',
+              $r('app.string.enter_first_name'),
               this.state.firstNameError,
               InputType.Normal,
               (value: string) => {
@@ -276,10 +325,10 @@ struct CreateUserPage {
               }
             )
 
-            this.BuildTextField(
-              'Last Name',
+            this.BuildTextFieldWithResource(
+              $r('app.string.last_name'),
               this.lastNameInput,
-              'Enter last name',
+              $r('app.string.enter_last_name'),
               this.state.lastNameError,
               InputType.Normal,
               (value: string) => {
@@ -291,10 +340,10 @@ struct CreateUserPage {
               }
             )
 
-            this.BuildTextField(
-              'Email',
+            this.BuildTextFieldWithResource(
+              $r('app.string.email'),
               this.emailInput,
-              'Enter email address',
+              $r('app.string.enter_email'),
               this.state.emailError,
               InputType.Email,
               (value: string) => {
@@ -315,7 +364,7 @@ struct CreateUserPage {
 
       // Submit button
       Column() {
-        Button(this.state.isSaving ? 'Creating...' : 'Create User')
+        Button(this.state.isSaving ? $r('app.string.creating') : $r('app.string.create_user'))
           .width('100%')
           .height(52)
           .fontSize(16)

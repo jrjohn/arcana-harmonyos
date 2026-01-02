@@ -97,6 +97,10 @@
       "value": "暂无用户"
     },
     {
+      "name": "no_users_message",
+      "value": "创建您的第一个用户开始使用"
+    },
+    {
       "name": "first_name_required",
       "value": "请输入名"
     },
@@ -247,6 +251,118 @@
     {
       "name": "created_by",
       "value": "由 %s 创建"
+    },
+    {
+      "name": "user_information",
+      "value": "用户信息"
+    },
+    {
+      "name": "user_id",
+      "value": "用户ID"
+    },
+    {
+      "name": "user_avatar",
+      "value": "用户头像"
+    },
+    {
+      "name": "save_changes",
+      "value": "保存更改"
+    },
+    {
+      "name": "saving",
+      "value": "保存中..."
+    },
+    {
+      "name": "creating",
+      "value": "创建中..."
+    },
+    {
+      "name": "loading_user",
+      "value": "加载用户..."
+    },
+    {
+      "name": "deleting",
+      "value": "删除中..."
+    },
+    {
+      "name": "unsaved_changes",
+      "value": "未保存的更改"
+    },
+    {
+      "name": "unsaved_changes_message",
+      "value": "您有未保存的更改，确定要离开吗？"
+    },
+    {
+      "name": "stay",
+      "value": "留下"
+    },
+    {
+      "name": "leave",
+      "value": "离开"
+    },
+    {
+      "name": "enter_first_name",
+      "value": "请输入名"
+    },
+    {
+      "name": "enter_last_name",
+      "value": "请输入姓"
+    },
+    {
+      "name": "enter_email",
+      "value": "请输入电子邮箱"
+    },
+    {
+      "name": "confirm_delete_message",
+      "value": "确定要删除此用户吗？此操作无法撤销。"
+    },
+    {
+      "name": "tap_to_change_avatar",
+      "value": "点击更换头像"
+    },
+    {
+      "name": "select_photo",
+      "value": "选择照片"
+    },
+    {
+      "name": "photo_picker_error",
+      "value": "选择照片失败"
+    },
+    {
+      "name": "home_title",
+      "value": "Arcana"
+    },
+    {
+      "name": "home_subtitle",
+      "value": "神秘用户管理"
+    },
+    {
+      "name": "total_users",
+      "value": "用户总数"
+    },
+    {
+      "name": "loaded_users",
+      "value": "已加载"
+    },
+    {
+      "name": "manage_users",
+      "value": "管理用户"
+    },
+    {
+      "name": "app_version",
+      "value": "版本 1.0.0"
+    },
+    {
+      "name": "nav_home",
+      "value": "首页"
+    },
+    {
+      "name": "nav_users",
+      "value": "用户"
+    },
+    {
+      "name": "nav_settings",
+      "value": "设置"
     }
   ]
 }

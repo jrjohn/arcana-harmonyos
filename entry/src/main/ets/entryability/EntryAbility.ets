@@ -12,6 +12,7 @@ const DOMAIN = 0x0000;
  */
 export default class EntryAbility extends UIAbility {
   private appInitializer: AppInitializer | null = null;
+  private initPromise: Promise<void> | null = null;
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, 'Ability onCreate');
@@ -19,11 +20,11 @@ export default class EntryAbility extends UIAbility {
     // Set context for service locator
     ServiceLocator.setContext(this.context);
 
-    // Initialize application dependencies
+    // Initialize application dependencies (start async initialization)
     this.appInitializer = AppInitializer.getInstance(this.context);
-    this.appInitializer.initialize();
+    this.initPromise = this.appInitializer.initialize();
 
-    hilog.info(DOMAIN, TAG, 'Application dependencies initialized');
+    hilog.info(DOMAIN, TAG, 'Application dependencies initialization started');
   }
 
   onDestroy(): void {
@@ -38,14 +39,29 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     hilog.info(DOMAIN, TAG, 'Ability onWindowStageCreate');
 
-    // Set main page
-    windowStage.loadContent('pages/UserListPage', (err) => {
-      if (err.code) {
-        hilog.error(DOMAIN, TAG, 'Failed to load content: %{public}s', JSON.stringify(err));
-        return;
-      }
-      hilog.info(DOMAIN, TAG, 'Content loaded successfully');
-    });
+    // Wait for initialization to complete before loading page
+    const loadPage = (): void => {
+      windowStage.loadContent('pages/MainPage', (err) => {
+        if (err.code) {
+          hilog.error(DOMAIN, TAG, 'Failed to load content: %{public}s', JSON.stringify(err));
+          return;
+        }
+        hilog.info(DOMAIN, TAG, 'Content loaded successfully');
+      });
+    };
+
+    if (this.initPromise) {
+      this.initPromise.then(() => {
+        hilog.info(DOMAIN, TAG, 'Initialization complete, loading page');
+        loadPage();
+      }).catch((error: Error) => {
+        hilog.error(DOMAIN, TAG, 'Initialization failed: %{public}s', error.message);
+        // Load page anyway to show error state
+        loadPage();
+      });
+    } else {
+      loadPage();
+    }
   }
 
   onWindowStageDestroy(): void {

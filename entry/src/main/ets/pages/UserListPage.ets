@@ -140,12 +140,20 @@ struct UserListPage {
 
   private showDeleteConfirmation(userId: number): void {
     try {
+      // Get localized strings from resource manager
+      const resourceMgr = this.getUIContext().getHostContext()?.resourceManager;
+      if (!resourceMgr) return;
+      const deleteTitle = resourceMgr.getStringSync($r('app.string.delete').id);
+      const confirmMsg = resourceMgr.getStringSync($r('app.string.confirm_delete').id);
+      const cancelText = resourceMgr.getStringSync($r('app.string.cancel').id);
+      const deleteText = resourceMgr.getStringSync($r('app.string.delete').id);
+
       this.getUIContext().getPromptAction().showDialog({
-        title: 'Delete User',
-        message: 'Are you sure you want to delete this user?',
+        title: deleteTitle,
+        message: confirmMsg,
         buttons: [
-          { text: 'Cancel', color: '#6B7280' },
-          { text: 'Delete', color: '#DC2626' }
+          { text: cancelText, color: '#6B7280' },
+          { text: deleteText, color: '#DC2626' }
         ]
       }).then((result) => {
         if (result.index === 1) {
@@ -170,10 +178,30 @@ struct UserListPage {
       Column() {
         // Title and sync button
         Row() {
-          Text('Users')
+          // Back button
+          Button() {
+            Image($r('sys.media.ohos_ic_public_arrow_left'))
+              .width(24)
+              .height(24)
+              .fillColor(Color.White)
+          }
+          .type(ButtonType.Circle)
+          .backgroundColor('rgba(255, 255, 255, 0.2)')
+          .width(40)
+          .height(40)
+          .onClick(() => {
+            try {
+              this.getUIContext().getRouter().back();
+            } catch (err) {
+              console.error(`back error: ${err}`);
+            }
+          })
+
+          Text($r('app.string.users'))
             .fontSize(28)
             .fontWeight(FontWeight.Bold)
             .fontColor(Color.White)
+            .margin({ left: 12 })
 
           Blank()
 
@@ -204,7 +232,7 @@ struct UserListPage {
         // Search bar
         SearchBar({
           searchText: $searchText,
-          placeholder: 'Search users...',
+          placeholderResource: $r('app.string.search_users'),
           onTextChange: (text: string) => {
             this.sendEvent({ type: 'SearchUsers', query: text });
           },
@@ -231,7 +259,7 @@ struct UserListPage {
       // Content
       Stack() {
         if (this.state.isLoading && this.state.users.length === 0) {
-          LoadingView({ message: 'Loading users...' })
+          LoadingView({ messageResource: $r('app.string.loading') })
         } else if (this.state.error && this.state.users.length === 0) {
           ErrorView({
             message: this.state.error,
@@ -240,10 +268,10 @@ struct UserListPage {
           })
         } else if (this.state.isEmpty) {
           EmptyView({
-            title: 'No users yet',
-            message: 'Create your first user to get started',
+            titleResource: $r('app.string.no_users'),
+            messageResource: $r('app.string.no_users_message'),
             showAction: true,
-            actionText: 'Create User',
+            actionTextResource: $r('app.string.create_user'),
             onAction: () => this.sendEvent({ type: 'CreateUser' })
           })
         } else {

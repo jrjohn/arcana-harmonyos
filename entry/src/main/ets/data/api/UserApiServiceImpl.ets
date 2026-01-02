@@ -5,7 +5,7 @@
 
 import { http } from '@kit.NetworkKit';
 import { injectable, preDestroy } from '../../core/di/decorators';
-import { IUserApiService, ILogger } from '../../core/di/interfaces';
+import { IUserApiService } from '../../core/di/interfaces';
 import { ApiConfig, ApiEndpoints, ApiHeaders, HttpStatus } from './ApiConfig';
 import {
   PaginatedUsersResponse,
@@ -17,6 +17,7 @@ import {
 import { User, CreateUserRequest, UpdateUserRequest, PaginatedUsers } from '../../domain/models/User';
 import { Result, ResultFactory } from '../../domain/models/Result';
 import { AppError, AppErrorFactory } from '../../domain/models/AppError';
+import { InterceptedHttpClient } from '../../core/network/HttpInterceptor';
 
 const TAG = 'UserApiServiceImpl';
 
@@ -25,26 +26,17 @@ const TAG = 'UserApiServiceImpl';
  */
 @injectable()
 export class UserApiServiceImpl implements IUserApiService {
-  private httpRequest: http.HttpRequest;
-  private logger?: ILogger;
+  private httpClient: InterceptedHttpClient;
 
   constructor() {
-    this.httpRequest = http.createHttp();
-  }
-
-  /**
-   * Sets the logger (for manual injection)
-   */
-  setLogger(logger: ILogger): void {
-    this.logger = logger;
+    this.httpClient = new InterceptedHttpClient();
   }
 
   async getUsers(page: number = 1, perPage: number = 6): Promise<Result<PaginatedUsers, AppError>> {
     const url = `${ApiConfig.BASE_URL}${ApiEndpoints.USERS}?page=${page}&per_page=${perPage}`;
-    this.log(`Fetching users from: ${url}`);
 
     try {
-      const response = await this.httpRequest.request(url, {
+      const response = await this.httpClient.request(url, {
         method: http.RequestMethod.GET,
         header: this.getHeaders(),
         connectTimeout: ApiConfig.TIMEOUT,
@@ -53,24 +45,20 @@ export class UserApiServiceImpl implements IUserApiService {
 
       if (response.responseCode === HttpStatus.OK) {
         const data = JSON.parse(response.result as string) as PaginatedUsersResponse;
-        this.log(`Successfully fetched ${data.data.length} users`);
         return ResultFactory.success(UserDtoMapper.toPaginatedDomain(data));
       } else {
-        this.logError(`API error: ${response.responseCode}`);
         return ResultFactory.failure(AppErrorFactory.fromHttpStatus(response.responseCode));
       }
     } catch (error) {
-      this.logError(`Network error fetching users: ${error}`);
       return ResultFactory.failure(this.handleError(error));
     }
   }
 
   async getUser(userId: number): Promise<Result<User, AppError>> {
     const url = `${ApiConfig.BASE_URL}${ApiEndpoints.userById(userId)}`;
-    this.log(`Fetching user ${userId} from: ${url}`);
 
     try {
-      const response = await this.httpRequest.request(url, {
+      const response = await this.httpClient.request(url, {
         method: http.RequestMethod.GET,
         header: this.getHeaders(),
         connectTimeout: ApiConfig.TIMEOUT,
@@ -79,17 +67,13 @@ export class UserApiServiceImpl implements IUserApiService {
 
       if (response.responseCode === HttpStatus.OK) {
         const data = JSON.parse(response.result as string) as SingleUserResponse;
-        this.log(`Successfully fetched user: ${data.data.email}`);
         return ResultFactory.success(UserDtoMapper.toDomain(data.data));
       } else if (response.responseCode === HttpStatus.NOT_FOUND) {
-        this.logWarn(`User ${userId} not found`);
         return ResultFactory.failure(AppErrorFactory.apiNotFound(`User ${userId}`));
       } else {
-        this.logError(`API error: ${response.responseCode}`);
         return ResultFactory.failure(AppErrorFactory.fromHttpStatus(response.responseCode));
       }
     } catch (error) {
-      this.logError(`Network error fetching user: ${error}`);
       return ResultFactory.failure(this.handleError(error));
     }
   }
@@ -97,10 +81,9 @@ export class UserApiServiceImpl implements IUserApiService {
   async createUser(request: CreateUserRequest): Promise<Result<User, AppError>> {
     const url = `${ApiConfig.BASE_URL}${ApiEndpoints.USERS}`;
     const body = UserDtoMapper.toCreateDto(request);
-    this.log(`Creating user at: ${url}`);
 
     try {
-      const response = await this.httpRequest.request(url, {
+      const response = await this.httpClient.request(url, {
         method: http.RequestMethod.POST,
         header: this.getHeaders(),
         extraData: JSON.stringify(body),
@@ -110,14 +93,11 @@ export class UserApiServiceImpl implements IUserApiService {
 
       if (response.responseCode === HttpStatus.CREATED || response.responseCode === HttpStatus.OK) {
         const data = JSON.parse(response.result as string) as CreateUserResponseDto;
-        this.log(`Successfully created user with ID: ${data.id}`);
         return ResultFactory.success(UserDtoMapper.createResponseToDomain(data, request));
       } else {
-        this.logError(`API error creating user: ${response.responseCode}`);
         return ResultFactory.failure(AppErrorFactory.fromHttpStatus(response.responseCode));
       }
     } catch (error) {
-      this.logError(`Network error creating user: ${error}`);
       return ResultFactory.failure(this.handleError(error));
     }
   }
@@ -125,10 +105,9 @@ export class UserApiServiceImpl implements IUserApiService {
   async updateUser(request: UpdateUserRequest): Promise<Result<User, AppError>> {
     const url = `${ApiConfig.BASE_URL}${ApiEndpoints.userById(request.id)}`;
     const body = UserDtoMapper.toUpdateDto(request);
-    this.log(`Updating user ${request.id} at: ${url}`);
 
     try {
-      const response = await this.httpRequest.request(url, {
+      const response = await this.httpClient.request(url, {
         method: http.RequestMethod.PUT,
         header: this.getHeaders(),
         extraData: JSON.stringify(body),
@@ -138,27 +117,22 @@ export class UserApiServiceImpl implements IUserApiService {
 
       if (response.responseCode === HttpStatus.OK) {
         const data = JSON.parse(response.result as string) as UpdateUserResponseDto;
-        this.log(`Successfully updated user ${request.id}`);
         return ResultFactory.success(UserDtoMapper.updateResponseToDomain(data, request));
       } else if (response.responseCode === HttpStatus.NOT_FOUND) {
-        this.logWarn(`User ${request.id} not found for update`);
         return ResultFactory.failure(AppErrorFactory.apiNotFound(`User ${request.id}`));
       } else {
-        this.logError(`API error updating user: ${response.responseCode}`);
         return ResultFactory.failure(AppErrorFactory.fromHttpStatus(response.responseCode));
       }
     } catch (error) {
-      this.logError(`Network error updating user: ${error}`);
       return ResultFactory.failure(this.handleError(error));
     }
   }
 
   async deleteUser(userId: number): Promise<Result<void, AppError>> {
     const url = `${ApiConfig.BASE_URL}${ApiEndpoints.userById(userId)}`;
-    this.log(`Deleting user ${userId} at: ${url}`);
 
     try {
-      const response = await this.httpRequest.request(url, {
+      const response = await this.httpClient.request(url, {
         method: http.RequestMethod.DELETE,
         header: this.getHeaders(),
         connectTimeout: ApiConfig.TIMEOUT,
@@ -166,24 +140,20 @@ export class UserApiServiceImpl implements IUserApiService {
       });
 
       if (response.responseCode === HttpStatus.NO_CONTENT || response.responseCode === HttpStatus.OK) {
-        this.log(`Successfully deleted user ${userId}`);
         return ResultFactory.success(undefined);
       } else if (response.responseCode === HttpStatus.NOT_FOUND) {
-        this.logWarn(`User ${userId} not found for deletion`);
         return ResultFactory.failure(AppErrorFactory.apiNotFound(`User ${userId}`));
       } else {
-        this.logError(`API error deleting user: ${response.responseCode}`);
         return ResultFactory.failure(AppErrorFactory.fromHttpStatus(response.responseCode));
       }
     } catch (error) {
-      this.logError(`Network error deleting user: ${error}`);
       return ResultFactory.failure(this.handleError(error));
     }
   }
 
   @preDestroy()
   destroy(): void {
-    this.httpRequest.destroy();
+    this.httpClient.destroy();
   }
 
   private getHeaders(): Record<string, string> {
@@ -205,23 +175,5 @@ export class UserApiServiceImpl implements IUserApiService {
       return AppErrorFactory.networkError(error.message, error);
     }
     return AppErrorFactory.unknown();
-  }
-
-  private log(message: string): void {
-    if (this.logger) {
-      this.logger.d(TAG, message);
-    }
-  }
-
-  private logWarn(message: string): void {
-    if (this.logger) {
-      this.logger.w(TAG, message);
-    }
-  }
-
-  private logError(message: string): void {
-    if (this.logger) {
-      this.logger.e(TAG, message);
-    }
   }
 }
