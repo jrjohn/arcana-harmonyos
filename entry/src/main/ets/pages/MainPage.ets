@@ -639,18 +639,18 @@ struct MainPage {
           this.BuildSettingsSection($r('app.string.theme'))
 
           this.BuildSettingsItem($r('app.string.dark_mode'), $r('sys.media.ohos_ic_public_camera'), () => {
-            this.getUIContext().getPromptAction().showToast({ message: 'Coming soon', duration: 2000 });
+            this.getUIContext().getPromptAction().showToast({ message: $r('app.string.coming_soon'), duration: 2000 });
           })
 
           // About section
           this.BuildSettingsSection($r('app.string.about'))
 
           this.BuildSettingsItem($r('app.string.version'), $r('sys.media.ohos_ic_public_edit'), () => {
-            this.getUIContext().getPromptAction().showToast({ message: 'Version 1.0.0', duration: 2000 });
+            this.getUIContext().getPromptAction().showToast({ message: $r('app.string.app_version'), duration: 2000 });
           })
 
           this.BuildSettingsItem($r('app.string.privacy_policy'), $r('sys.media.ohos_ic_public_fail'), () => {
-            this.getUIContext().getPromptAction().showToast({ message: 'Coming soon', duration: 2000 });
+            this.getUIContext().getPromptAction().showToast({ message: $r('app.string.coming_soon'), duration: 2000 });
           })
         }
         .width('100%')

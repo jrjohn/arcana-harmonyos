@@ -363,6 +363,18 @@
     {
       "name": "nav_settings",
       "value": "Settings"
+    },
+    {
+      "name": "users_refreshed",
+      "value": "Users refreshed"
+    },
+    {
+      "name": "coming_soon",
+      "value": "Coming soon"
+    },
+    {
+      "name": "error_occurred",
+      "value": "An error occurred"
     }
   ]
 }
