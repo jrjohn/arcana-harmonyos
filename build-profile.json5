@@ -1,24 +1,10 @@
 {
   "app": {
-    "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "/Users/jrjohn/.ohos/config/default_arcana-harmonyos_g49f75EbdCnV1-t9RdYpOvR43FUzJ8HsJ_7vgB_nTTM=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001B73830A6D7D8ABFD9A783F75AFF61F1644B1D624E3841D1A853ED76EEA5B51671E682619990BE58",
-          "profile": "/Users/jrjohn/.ohos/config/default_arcana-harmonyos_g49f75EbdCnV1-t9RdYpOvR43FUzJ8HsJ_7vgB_nTTM=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/jrjohn/.ohos/config/default_arcana-harmonyos_g49f75EbdCnV1-t9RdYpOvR43FUzJ8HsJ_7vgB_nTTM=.p12",
-          "storePassword": "0000001BF56B742C10E1F6605D2E622894510ED8BFC23643BC8EEBA7794C1414EB13E474E659A33ED0AF3F"
-        }
-      }
-    ],
+    "signingConfigs": [],
     "products": [
       {
         "name": "default",
-        "signingConfig": "default",
+        
         "compatibleSdkVersion": "5.0.0(12)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
@@ -27,7 +13,7 @@
             "useNormalizedOHMUrl": true
           }
         },
-        "targetSdkVersion": "6.0.1(21)"
+        "targetSdkVersion": "5.0.0(12)"
       }
     ],
     "buildModeSet": [
