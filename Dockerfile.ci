@@ -1,7 +1,7 @@
 # ============================================
 # HarmonyOS Build Environment (CI)
 # OHOS SDK 6.0.0.858 / JDK 17
-# SDK pre-extracted on host, mounted via volume
+# SDK baked into image (no host mount needed)
 # ============================================
 FROM ubuntu:22.04
 
@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN echo "registry=https://registry.npmjs.org/" > /root/.npmrc \
     && echo "@ohos:registry=https://repo.harmonyos.com/npm/" >> /root/.npmrc
+
+# Bake OHOS SDK into image
+COPY ohos-sdk-extracted /opt/ohos-sdk
 
 WORKDIR /project
 CMD ["hvigorw", "assembleHap", "--mode", "module", "-p", "product=default", "--no-daemon"]

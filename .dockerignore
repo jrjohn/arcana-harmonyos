@@ -1,0 +1,5 @@
+ohos-sdk.tar.gz.*
+.git
+node_modules
+build
+.cxx
