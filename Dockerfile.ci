@@ -1,0 +1,22 @@
+# ============================================
+# HarmonyOS Build Environment (CI)
+# OHOS SDK 6.0.0.858 / JDK 17
+# SDK pre-extracted on host, mounted via volume
+# ============================================
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV OHOS_SDK_HOME=/opt/ohos-sdk/command-line-tools/sdk
+ENV HOS_SDK_HOME=/opt/ohos-sdk/command-line-tools/sdk
+ENV DEVECO_SDK_HOME=/opt/ohos-sdk/command-line-tools/sdk
+ENV PATH="${PATH}:/opt/ohos-sdk/command-line-tools/bin:/opt/ohos-sdk/command-line-tools/tool/node/bin"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates unzip git libgl1-mesa-dev openjdk-17-jdk-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo "registry=https://registry.npmjs.org/" > /root/.npmrc \
+    && echo "@ohos:registry=https://repo.harmonyos.com/npm/" >> /root/.npmrc
+
+WORKDIR /project
+CMD ["hvigorw", "assembleHap", "--mode", "module", "-p", "product=default", "--no-daemon"]
