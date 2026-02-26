@@ -1,0 +1,13 @@
+services:
+  harmonyos-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+      platforms:
+        - linux/amd64
+    image: localhost:5000/arcana/harmonyos-app:${VERSION:-1.0.0}
+    platform: linux/amd64
+    volumes:
+      - .:/project
+      - ./ohos-sdk-extracted:/opt/ohos-sdk
+    command: hvigorw assembleHap --mode module -p product=default -p buildMode=debug --no-daemon
