@@ -1,6 +1,7 @@
 import { BaseViewModel, BaseInput, BaseState, BaseEffect } from './BaseViewModel';
 import { User, PaginatedUsers } from '../../domain/models/User';
-import { IUserRepositoryService, ISyncManager, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { ISyncManager, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { IUserService } from '../../domain/services/UserService';
 import { SyncUnsubscribeCallback, SyncState } from '../../core/sync/SyncManager';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
@@ -132,7 +133,7 @@ export type UserListEffect =
  * Implements the Input/Output pattern for clean separation.
  */
 export class UserListViewModel extends BaseViewModel<UserListInput, UserListState, UserListEffect> {
-  private repository: IUserRepositoryService;
+  private userService: IUserService;
   private syncManager: ISyncManager;
   private analytics: IAnalyticsService;
   private networkUnsubscribe: UnsubscribeCallback | null = null;
@@ -140,7 +141,7 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
   private cacheEventUnsubscribe: EventUnsubscribe | null = null;
 
   constructor(
-    repository: IUserRepositoryService,
+    userService: IUserService,
     syncManager: ISyncManager,
     analytics: IAnalyticsService
   ) {
@@ -159,7 +160,7 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
       isEmpty: true
     });
 
-    this.repository = repository;
+    this.userService = userService;
     this.syncManager = syncManager;
     this.analytics = analytics;
 
@@ -369,7 +370,7 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
 
     const timing = this.analytics.startTiming('load_users');
 
-    const result = await this.repository.getUsers(1, forceRefresh);
+    const result = await this.userService.getUsers(1, forceRefresh);
 
     timing.end();
 
@@ -405,7 +406,7 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
     const props = AnalyticsProps.of('page', nextPage);
     this.analytics.trackEvent('load_next_page', props);
 
-    const result = await this.repository.getUsers(nextPage);
+    const result = await this.userService.getUsers(nextPage);
 
     if (result.isSuccess) {
       const successResult = result as Success<PaginatedUsers>;

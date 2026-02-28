@@ -1,6 +1,7 @@
 import { BaseViewModel, BaseInput, BaseState, BaseEffect } from './BaseViewModel';
 import { User, PaginatedUsers } from '../../domain/models/User';
-import { IUserRepositoryService, IAnalyticsService } from '../../core/di/interfaces';
+import { IAnalyticsService } from '../../core/di/interfaces';
+import { IUserService } from '../../domain/services/UserService';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
 import { Logger } from '../../core/logging/Logger';
@@ -54,11 +55,11 @@ export type HomeEffect =
  * Implements the Input/Output pattern for clean separation.
  */
 export class HomeViewModel extends BaseViewModel<HomeInput, HomeState, HomeEffect> {
-  private repository: IUserRepositoryService;
+  private userService: IUserService;
   private analytics: IAnalyticsService;
 
   constructor(
-    repository: IUserRepositoryService,
+    userService: IUserService,
     analytics: IAnalyticsService
   ) {
     super({
@@ -69,7 +70,7 @@ export class HomeViewModel extends BaseViewModel<HomeInput, HomeState, HomeEffec
       users: []
     });
 
-    this.repository = repository;
+    this.userService = userService;
     this.analytics = analytics;
 
     Logger.d(TAG, 'HomeViewModel created');
@@ -160,7 +161,7 @@ export class HomeViewModel extends BaseViewModel<HomeInput, HomeState, HomeEffec
 
     const timing = this.analytics.startTiming('home_load_data');
 
-    const result = await this.repository.getUsers(1, false);
+    const result = await this.userService.getUsers(1, false);
 
     timing.end();
 

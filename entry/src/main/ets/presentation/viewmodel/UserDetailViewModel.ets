@@ -1,6 +1,7 @@
 import { BaseViewModel, BaseState, BaseEffect } from './BaseViewModel';
 import { User } from '../../domain/models/User';
-import { IUserRepositoryService, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { IUserService } from '../../domain/services/UserService';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
 import { Logger } from '../../core/logging/Logger';
@@ -97,11 +98,11 @@ export type UserDetailEffect =
  * ViewModel for the User Detail screen.
  */
 export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDetailState, UserDetailEffect> {
-  private repository: IUserRepositoryService;
+  private userService: IUserService;
   private analytics: IAnalyticsService;
 
   constructor(
-    repository: IUserRepositoryService,
+    userService: IUserService,
     analytics: IAnalyticsService,
     userId: number
   ) {
@@ -114,7 +115,7 @@ export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDeta
       showDeleteConfirmation: false
     });
 
-    this.repository = repository;
+    this.userService = userService;
     this.analytics = analytics;
 
     Logger.d(TAG, `UserDetailViewModel created for user ${userId}`);
@@ -228,7 +229,7 @@ export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDeta
 
     const timing = this.analytics.startTiming('load_user_detail');
 
-    const result = await this.repository.getUser(userId);
+    const result = await this.userService.getUserById(userId);
 
     timing.end();
 
@@ -281,7 +282,7 @@ export class UserDetailViewModel extends BaseViewModel<UserDetailInput, UserDeta
 
     const timing = this.analytics.startTiming('delete_user');
 
-    const result = await this.repository.deleteUser(this._state.userId);
+    const result = await this.userService.deleteUser(this._state.userId);
 
     timing.end();
 

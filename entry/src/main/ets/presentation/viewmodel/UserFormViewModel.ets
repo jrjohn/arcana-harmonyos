@@ -1,6 +1,7 @@
 import { BaseViewModel, BaseState, BaseEffect } from './BaseViewModel';
 import { User, CreateUserRequest, UpdateUserRequest } from '../../domain/models/User';
-import { IUserRepositoryService, IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { IAnalyticsService, AnalyticsProps } from '../../core/di/interfaces';
+import { IUserService } from '../../domain/services/UserService';
 import { UserValidator, UserValidationResult } from '../../domain/validators/UserValidator';
 import { Success, Failure } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
@@ -112,11 +113,11 @@ export type UserFormEffect =
  * Handles form validation and submission.
  */
 export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormState, UserFormEffect> {
-  private repository: IUserRepositoryService;
+  private userService: IUserService;
   private analytics: IAnalyticsService;
 
   constructor(
-    repository: IUserRepositoryService,
+    userService: IUserService,
     analytics: IAnalyticsService,
     mode: 'create' | 'edit' = 'create',
     userId?: number
@@ -139,7 +140,7 @@ export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormStat
       originalUser: undefined
     });
 
-    this.repository = repository;
+    this.userService = userService;
     this.analytics = analytics;
 
     Logger.d(TAG, `UserFormViewModel created in ${mode} mode`);
@@ -265,7 +266,7 @@ export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormStat
   private async loadUser(userId: number): Promise<void> {
     this.setLoading(true);
 
-    const result = await this.repository.getUser(userId);
+    const result = await this.userService.getUserById(userId);
 
     if (result.isSuccess) {
       const successResult = result as Success<User>;
@@ -411,7 +412,7 @@ export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormStat
       avatar: this._state.avatar !== '' ? this._state.avatar : ''
     };
 
-    const result = await this.repository.createUser(request);
+    const result = await this.userService.createUser(request);
 
     if (result.isSuccess) {
       const successResult = result as Success<User>;
@@ -443,7 +444,7 @@ export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormStat
       avatar: this._state.avatar !== '' ? this._state.avatar : ''
     };
 
-    const result = await this.repository.updateUser(request);
+    const result = await this.userService.updateUser(request);
 
     if (result.isSuccess) {
       const successResult = result as Success<User>;

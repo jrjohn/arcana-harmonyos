@@ -16,6 +16,8 @@ import {
   INetworkMonitor,
   IContextProvider
 } from './interfaces';
+import { IUserService } from '../../domain/services/UserService';
+import { UserServiceImpl } from '../../domain/services/impl/UserServiceImpl';
 import { INavigator, Navigator } from '../navigation/Navigator';
 import { UserRepositoryImpl } from '../../domain/repository/impl/UserRepositoryImpl';
 import { SyncManager } from '../sync/SyncManager';
@@ -179,6 +181,11 @@ export class AppContainer {
       this.container.bind<IUserRepositoryService>(TYPES.UserRepository)
         .toConstantValue(userRepository);
 
+      // Bind domain user service (depends on repository)
+      const userService = new UserServiceImpl(userRepository);
+      this.container.bind<IUserService>(TYPES.UserService)
+        .toConstantValue(userService);
+
       // Bind sync manager (depends on repository)
       const syncManager = new SyncManager(userRepository);
       this.container.bind<ISyncManager>(TYPES.SyncManager)
@@ -294,6 +301,13 @@ export class AppContainer {
   }
 
   /**
+   * Gets the user service (domain layer)
+   */
+  getUserService(): IUserService {
+    return this.resolve<IUserService>(TYPES.UserService);
+  }
+
+  /**
    * Gets the sync manager
    */
   getSyncManager(): ISyncManager {
@@ -328,19 +342,19 @@ export class AppContainer {
    * Creates a HomeViewModel with injected dependencies
    */
   createHomeViewModel(): HomeViewModel {
-    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const userService = this.resolve<IUserService>(TYPES.UserService);
     const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
-    return new HomeViewModel(repository, analytics);
+    return new HomeViewModel(userService, analytics);
   }
 
   /**
    * Creates a UserListViewModel with injected dependencies
    */
   createUserListViewModel(): UserListViewModel {
-    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const userService = this.resolve<IUserService>(TYPES.UserService);
     const syncManager = this.resolve<ISyncManager>(TYPES.SyncManager);
     const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
-    return new UserListViewModel(repository, syncManager, analytics);
+    return new UserListViewModel(userService, syncManager, analytics);
   }
 
   /**
@@ -348,9 +362,9 @@ export class AppContainer {
    * @param userId - The user ID to load
    */
   createUserDetailViewModel(userId: number): UserDetailViewModel {
-    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const userService = this.resolve<IUserService>(TYPES.UserService);
     const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
-    return new UserDetailViewModel(repository, analytics, userId);
+    return new UserDetailViewModel(userService, analytics, userId);
   }
 
   /**
@@ -359,9 +373,9 @@ export class AppContainer {
    * @param userId - Optional user ID for edit mode
    */
   createUserFormViewModel(mode: 'create' | 'edit', userId?: number): UserFormViewModel {
-    const repository = this.resolve<IUserRepositoryService>(TYPES.UserRepository);
+    const userService = this.resolve<IUserService>(TYPES.UserService);
     const analytics = this.resolve<IAnalyticsService>(TYPES.AnalyticsService);
-    return new UserFormViewModel(repository, analytics, mode, userId);
+    return new UserFormViewModel(userService, analytics, mode, userId);
   }
 }
 
