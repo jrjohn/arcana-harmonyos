@@ -11,7 +11,7 @@ import {
 } from '../../domain/models/User';
 import { Result, Success, Failure } from '../../domain/models/Result';
 import { AppError, AppErrorFactory } from '../../domain/models/AppError';
-import { IUserRepository } from '../../domain/repository/IUserRepository';
+import { IUserRepository } from '../../domain/repository/UserRepository';
 import { IUserRepositoryService } from '../../core/di/interfaces';
 import { UserApiService } from '../api/UserApiService';
 import { UserLocalDataSource } from '../local/UserLocalDataSource';

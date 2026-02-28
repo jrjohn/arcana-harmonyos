@@ -19,13 +19,13 @@ import {
 } from './interfaces';
 
 // Import implementations
-import { NetworkMonitorService } from '../network/NetworkMonitorService';
-import { LoggerService } from '../logging/LoggerService';
-import { SyncManagerService } from '../sync/SyncManagerService';
-import { AnalyticsServiceImpl } from '../analytics/AnalyticsServiceImpl';
-import { UserRepositoryService } from '../../data/repository/UserRepositoryService';
-import { UserApiServiceImpl } from '../../data/api/UserApiServiceImpl';
-import { UserLocalDataSourceImpl } from '../../data/local/UserLocalDataSourceImpl';
+import { NetworkMonitorService } from '../network/impl/NetworkMonitorService';
+import { LoggerService } from '../logging/impl/LoggerService';
+import { SyncManagerService } from '../sync/impl/SyncManagerService';
+import { AnalyticsServiceImpl } from '../analytics/impl/AnalyticsServiceImpl';
+import { UserRepositoryService } from '../../domain/repository/impl/UserRepositoryService';
+import { UserApiServiceImpl } from '../../data/api/impl/UserApiServiceImpl';
+import { UserLocalDataSourceImpl } from '../../data/local/impl/UserLocalDataSourceImpl';
 
 /**
  * Context provider implementation

@@ -17,7 +17,7 @@ import {
   IContextProvider
 } from './interfaces';
 import { INavigator, Navigator } from '../navigation/Navigator';
-import { UserRepositoryImpl } from '../../data/repository/UserRepositoryImpl';
+import { UserRepositoryImpl } from '../../domain/repository/impl/UserRepositoryImpl';
 import { SyncManager } from '../sync/SyncManager';
 import { AnalyticsService } from '../analytics/AnalyticsService';
 import { Logger } from '../logging/Logger';

@@ -19,13 +19,13 @@ import {
 } from './interfaces';
 
 // Import implementations
-import { LoggerService } from '../logging/LoggerService';
-import { NetworkMonitorService } from '../network/NetworkMonitorService';
-import { SyncManagerService } from '../sync/SyncManagerService';
-import { AnalyticsServiceImpl } from '../analytics/AnalyticsServiceImpl';
-import { UserRepositoryService } from '../../data/repository/UserRepositoryService';
-import { UserApiServiceImpl } from '../../data/api/UserApiServiceImpl';
-import { UserLocalDataSourceRdb } from '../../data/local/UserLocalDataSourceRdb';
+import { LoggerService } from '../logging/impl/LoggerService';
+import { NetworkMonitorService } from '../network/impl/NetworkMonitorService';
+import { SyncManagerService } from '../sync/impl/SyncManagerService';
+import { AnalyticsServiceImpl } from '../analytics/impl/AnalyticsServiceImpl';
+import { UserRepositoryService } from '../../domain/repository/impl/UserRepositoryService';
+import { UserApiServiceImpl } from '../../data/api/impl/UserApiServiceImpl';
+import { UserLocalDataSourceRdb } from '../../data/local/impl/UserLocalDataSourceRdb';
 import { RdbStoreManager } from '../../data/local/RdbStoreManager';
 import { DataMigration } from '../../data/local/DataMigration';
 
