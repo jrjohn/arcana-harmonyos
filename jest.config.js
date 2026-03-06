@@ -24,15 +24,18 @@ module.exports = {
   testMatch: ['<rootDir>/jest-tests/**/*.test.ts'],
 
   // Coverage: V8 (no Babel instrumentation needed)
-  // Note: collectCoverageFrom targets .ts copies of .ets; lcov is sed-patched back to .ets
+  // Scope to domain + pure-TS layers (no @kit dependencies → always compiles cleanly)
   coverageProvider: 'v8',
   collectCoverage: true,
   collectCoverageFrom: [
-    'entry/src/main/ets/**/*.ts',
-    '!entry/src/main/ets/pages/**',
-    '!entry/src/main/ets/entryability/**',
-    '!entry/src/main/ets/presentation/components/**',
-    '!entry/src/main/ets/workers/**',
+    // Domain layer — pure TypeScript, 100% @kit-free
+    'entry/src/main/ets/domain/**/*.ts',
+    '!entry/src/main/ets/domain/repository/impl/UserRepositoryImpl.ts',  // has @kit.AbilityKit
+    // Data cache — pure logic
+    'entry/src/main/ets/data/cache/**/*.ts',
+    'entry/src/main/ets/data/api/ApiConfig.ts',
+    'entry/src/main/ets/data/api/dto/UserDto.ts',
+    'entry/src/main/ets/data/api/UserApiDeclarative.ts',
   ],
   coverageReporters: ['lcov', 'text-summary'],
   coverageDirectory: 'coverage/jest',
