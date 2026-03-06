@@ -5,10 +5,12 @@ module.exports = {
   // Recognize .ets as TypeScript
   moduleFileExtensions: ['ets', 'ts', 'tsx', 'js', 'jsx', 'json'],
 
-  // Transform .ets and .ts via ts-jest
+  // Transform .ets and .ts via ts-jest (diagnostics: false = transpile-only, no type errors for .ets resolution)
   transform: {
-    '^.+\\.ets$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
-    '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
+    '^.+\\.(ets|ts)$': ['ts-jest', {
+      tsconfig: 'tsconfig.jest.json',
+      diagnostics: false,  // Skip TS type-checking; Jest resolver handles .ets via moduleFileExtensions
+    }],
   },
 
   // Map HarmonyOS-specific modules to shims/mocks
