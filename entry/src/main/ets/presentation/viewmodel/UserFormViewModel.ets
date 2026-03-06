@@ -409,7 +409,7 @@ export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormStat
       firstName: this._state.firstName.trim(),
       lastName: this._state.lastName.trim(),
       email: this._state.email.trim().toLowerCase(),
-      avatar: this._state.avatar !== '' ? this._state.avatar : ''
+      avatar: this._state.avatar
     };
 
     const result = await this.userService.createUser(request);
@@ -441,7 +441,7 @@ export class UserFormViewModel extends BaseViewModel<UserFormInput, UserFormStat
       firstName: this._state.firstName.trim(),
       lastName: this._state.lastName.trim(),
       email: this._state.email.trim().toLowerCase(),
-      avatar: this._state.avatar !== '' ? this._state.avatar : ''
+      avatar: this._state.avatar
     };
 
     const result = await this.userService.updateUser(request);

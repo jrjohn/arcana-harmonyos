@@ -1,7 +1,7 @@
 import { CreateUserRequest, UpdateUserRequest } from '../models/User';
 import { Result, Success, Failure } from '../models/Result';
-import { EmailValidator, EmailValidationError } from './EmailValidator';
-import { NameValidator, NameValidationError } from './NameValidator';
+import { EmailValidator } from './EmailValidator';
+import { NameValidator } from './NameValidator';
 
 /**
  * Field-level validation error
@@ -52,7 +52,7 @@ export class UserValidator {
   /**
    * Validates a complete update user request
    */
-  static validateUpdateRequest(request: UpdateUserRequest): UserValidationResult {
+  static validateUpdateRequest(request: UpdateUserRequest): UserValidationResult { // NOSONAR javascript:S4144
     return UserValidator.validateUserData(
       request.firstName,
       request.lastName,
@@ -123,15 +123,15 @@ export class UserValidator {
     const lastNameResult = NameValidator.validate(lastName);
     const emailResult = EmailValidator.validate(email);
 
-    const normalizedFirstName = firstNameResult.normalizedName !== undefined ? firstNameResult.normalizedName : '';
-    const normalizedLastName = lastNameResult.normalizedName !== undefined ? lastNameResult.normalizedName : '';
-    const normalizedEmail = emailResult.normalizedEmail !== undefined ? emailResult.normalizedEmail : '';
+    const normalizedFirstName = firstNameResult.normalizedName ?? '';
+    const normalizedLastName = lastNameResult.normalizedName ?? '';
+    const normalizedEmail = emailResult.normalizedEmail ?? '';
 
     const validatedData: ValidatedUserData = {
       firstName: normalizedFirstName,
       lastName: normalizedLastName,
       email: normalizedEmail,
-      avatar: avatar !== '' ? avatar : UserValidator.generateDefaultAvatar(normalizedFirstName, normalizedLastName)
+      avatar: avatar === '' ? UserValidator.generateDefaultAvatar(normalizedFirstName, normalizedLastName) : avatar
     };
     return new Success<ValidatedUserData>(validatedData);
   }

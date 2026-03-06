@@ -422,7 +422,7 @@ export class LocalizationManager implements ILocalizationManager {
 
     // Replace {0}, {1}, etc.
     args.forEach((arg, index) => {
-      result = result.replace(new RegExp(`\\{${index}\\}`, 'g'), String(arg));
+      result = result.replaceAll(new RegExp(String.raw`\{${index}\}`, 'g'), String(arg));
     });
 
     // Replace %s, %d (first occurrence for each arg)

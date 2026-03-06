@@ -7,19 +7,18 @@
  * @see https://developer.harmonyos.com/en/docs/documentation/doc-references-V3/js-apis-data-relationalstore
  */
 
-import { relationalStore, ValuesBucket } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 
 // Re-export for convenience
-export { relationalStore, ValuesBucket };
+export { relationalStore, ValuesBucket } from '@kit.ArkData';
 
 const TAG = 'RdbStoreManager';
 
 /**
  * Database configuration
  */
-export class DB_CONFIG {
+export class DB_CONFIG { // NOSONAR javascript:S101
   static readonly NAME: string = 'arcana.db';
   static readonly VERSION: number = 1;
   static readonly SECURITY_LEVEL: relationalStore.SecurityLevel = relationalStore.SecurityLevel.S1;

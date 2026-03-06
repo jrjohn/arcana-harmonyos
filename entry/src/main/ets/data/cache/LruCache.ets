@@ -81,13 +81,12 @@ export class LruCache<K, V> {
     while (this.cache.size >= this.maxSize) {
       const keysIterator = this.cache.keys();
       const firstResult = keysIterator.next();
-      if (!firstResult.done) {
-        const firstKey: K = firstResult.value as K;
-        this.cache.delete(firstKey);
-        Logger.d(TAG, `[${this.name}] Evicted LRU entry`);
-      } else {
+      if (firstResult.done) {
         break;
       }
+      const firstKey: K = firstResult.value as K;
+      this.cache.delete(firstKey);
+      Logger.d(TAG, `[${this.name}] Evicted LRU entry`);
     }
 
     // Add new entry

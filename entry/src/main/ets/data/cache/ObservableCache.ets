@@ -159,14 +159,13 @@ export class ObservableCache<K, V> {
     while (this.cache.size >= this.maxSize) {
       const keysIterator = this.cache.keys();
       const firstResult = keysIterator.next();
-      if (!firstResult.done) {
-        const evictedKey = firstResult.value as K;
-        this.cache.delete(evictedKey);
-        this.notifyKeySubscribers(evictedKey, undefined);
-        Logger.d(TAG, `[${this.name}] Evicted key due to capacity`);
-      } else {
-        break;
+      if (firstResult.done) {
+        break; // inserted to fix S7735
       }
+      const evictedKey = firstResult.value as K;
+      this.cache.delete(evictedKey);
+      this.notifyKeySubscribers(evictedKey, undefined);
+      Logger.d(TAG, `[${this.name}] Evicted key due to capacity`);
     }
 
     // Add new entry

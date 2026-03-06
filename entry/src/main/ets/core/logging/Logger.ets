@@ -144,8 +144,8 @@ export class Logger {
       try {
         const json = JSON.stringify(data, null, 2);
         Logger.d(tag, `${label}: ${json}`);
-      } catch (_e) {
-        Logger.d(tag, `${label}: [Unable to stringify]`);
+      } catch (error_) {
+        Logger.d(tag, `${label}: [Unable to stringify: ${error_}]`);
       }
     }
   }

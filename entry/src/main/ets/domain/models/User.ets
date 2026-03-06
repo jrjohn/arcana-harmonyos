@@ -50,10 +50,10 @@ export class UserImpl implements User {
   static copyWith(user: User, updates: UserUpdateFields): User {
     return new UserImpl(
       user.id,
-      updates.email !== undefined ? updates.email : user.email,
-      updates.firstName !== undefined ? updates.firstName : user.firstName,
-      updates.lastName !== undefined ? updates.lastName : user.lastName,
-      updates.avatar !== undefined ? updates.avatar : user.avatar
+      updates.email ?? user.email,
+      updates.firstName ?? user.firstName,
+      updates.lastName ?? user.lastName,
+      updates.avatar ?? user.avatar
     );
   }
 
@@ -161,7 +161,7 @@ export class LocalUserImpl implements LocalUser {
   readonly syncError?: string;
   readonly version: number;
 
-  constructor(
+  constructor( // NOSONAR javascript:S107
     id: number,
     email: string,
     firstName: string,
@@ -267,7 +267,7 @@ export class LocalUserImpl implements LocalUser {
 
   static markAsSynced(user: LocalUser, serverId?: number): LocalUser {
     return new LocalUserImpl(
-      serverId !== undefined ? serverId : user.id,
+      serverId ?? user.id,
       user.email,
       user.firstName,
       user.lastName,

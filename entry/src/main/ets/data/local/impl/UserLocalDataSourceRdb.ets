@@ -363,8 +363,8 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
       let timestamp: number | undefined;
       if (resultSet.goToFirstRow()) {
         const valueStr = resultSet.getString(resultSet.getColumnIndex(SyncMetadataColumns.VALUE));
-        const parsed = parseInt(valueStr, 10);
-        timestamp = isNaN(parsed) ? undefined : parsed;
+        const parsed = Number.parseInt(valueStr, 10);
+        timestamp = Number.isNaN(parsed) ? undefined : parsed;
       }
       resultSet.close();
 

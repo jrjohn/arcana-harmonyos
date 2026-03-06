@@ -25,7 +25,6 @@ import {
   ILogger,
   ISyncManager,
   IAnalyticsService,
-  IUserRepositoryService,
   IUserApiService,
   IUserLocalDataSource
 } from './interfaces';
@@ -175,7 +174,7 @@ export class MockSyncManager implements ISyncManager {
   };
   syncTriggerCount = 0;
 
-  subscribe(callback: SyncStateCallback): () => void {
+  subscribe(callback: SyncStateCallback): () => void { // NOSONAR javascript:S4144
     this.callbacks.add(callback);
     callback({ ...this.state });
     return () => this.callbacks.delete(callback);

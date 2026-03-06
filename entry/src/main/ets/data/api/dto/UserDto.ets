@@ -152,7 +152,7 @@ export class UserDtoMapper {
       response.email ?? request.email,
       response.first_name ?? request.firstName,
       response.last_name ?? request.lastName,
-      response.avatar !== undefined ? response.avatar : (request.avatar !== undefined ? request.avatar : '')
+      response.avatar ?? request.avatar ?? ''
     );
   }
 
@@ -165,7 +165,7 @@ export class UserDtoMapper {
       response.email ?? request.email,
       response.first_name ?? request.firstName,
       response.last_name ?? request.lastName,
-      response.avatar !== undefined ? response.avatar : (request.avatar !== undefined ? request.avatar : '')
+      response.avatar ?? request.avatar ?? ''
     );
   }
 }

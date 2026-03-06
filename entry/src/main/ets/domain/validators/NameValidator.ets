@@ -144,7 +144,7 @@ export class NameValidator {
     if (result.isValid && result.normalizedName !== undefined) {
       return new Success<string>(result.normalizedName);
     }
-    const errorMsg = result.error !== undefined ? NameValidator.getErrorMessage(result.error, type) : 'Invalid name';
+    const errorMsg = result.error === undefined ? 'Invalid name' : NameValidator.getErrorMessage(result.error, type);
     return new Failure<string>(errorMsg);
   }
 

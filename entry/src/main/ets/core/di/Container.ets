@@ -365,7 +365,7 @@ export class Container implements IContainer {
     }
   }
 
-  private async resolveBindingAsync<T>(binding: Binding<T>): Promise<T> {
+  private async resolveBindingAsync<T>(binding: Binding<T>): Promise<T> { // NOSONAR javascript:S3776
     switch (binding.scope) {
       case BindingScope.SINGLETON:
         if (!binding.initialized) {

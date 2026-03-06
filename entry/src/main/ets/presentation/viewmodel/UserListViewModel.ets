@@ -197,7 +197,7 @@ export class UserListViewModel extends BaseViewModel<UserListInput, UserListStat
       switch (event.type) {
         case CacheEventType.SYNC_COMPLETED:
           // Auto-refresh when sync completes with changes
-          if (event.payload && event.payload.syncedCount && event.payload.syncedCount > 0) {
+          if ((event.payload?.syncedCount ?? 0) > 0) {
             this.loadUsers(true);
           }
           break;

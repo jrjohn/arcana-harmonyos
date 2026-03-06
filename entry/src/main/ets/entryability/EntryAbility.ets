@@ -47,7 +47,7 @@ export default class EntryAbility extends UIAbility {
       });
     };
 
-    if (this.initPromise) {
+    if (this.initPromise !== null) {
       this.initPromise.then(() => {
         hilog.info(DOMAIN, TAG, 'Initialization complete, loading page');
         loadPage();

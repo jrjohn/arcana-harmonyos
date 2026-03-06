@@ -73,11 +73,11 @@ export class AppError extends Error {
     super(message);
     this.name = 'AppError';
     this.code = code;
-    this.userMessage = userMessage !== undefined ? userMessage : this.getDefaultUserMessage(code);
+    this.userMessage = userMessage ?? this.getDefaultUserMessage(code);
     this.debugInfo = options?.debugInfo;
     this.cause = options?.cause;
     this.timestamp = Date.now();
-    this.recoverable = options?.recoverable !== undefined ? options.recoverable : this.isRecoverableByDefault(code);
+    this.recoverable = options?.recoverable ?? this.isRecoverableByDefault(code);
   }
 
   private getDefaultUserMessage(code: ErrorCode): string {
@@ -217,28 +217,28 @@ export class AppErrorFactory {
     );
   }
 
-  static fromHttpStatus(status: number, message?: string): AppError {
+  static fromHttpStatus(status: number, message?: string): AppError { // NOSONAR javascript:S3776
     if (status === 404) {
-      return new AppError(ErrorCode.API_NOT_FOUND, message !== undefined ? message : 'Not found');
+      return new AppError(ErrorCode.API_NOT_FOUND, message ?? 'Not found');
     } else if (status === 401) {
-      return new AppError(ErrorCode.API_UNAUTHORIZED, message !== undefined ? message : 'Unauthorized');
+      return new AppError(ErrorCode.API_UNAUTHORIZED, message ?? 'Unauthorized');
     } else if (status === 403) {
-      return new AppError(ErrorCode.API_FORBIDDEN, message !== undefined ? message : 'Forbidden');
+      return new AppError(ErrorCode.API_FORBIDDEN, message ?? 'Forbidden');
     } else if (status === 429) {
-      return new AppError(ErrorCode.API_RATE_LIMITED, message !== undefined ? message : 'Rate limited');
+      return new AppError(ErrorCode.API_RATE_LIMITED, message ?? 'Rate limited');
     } else if (status >= 500) {
       return AppErrorFactory.serverError(status, message);
     } else if (status >= 400) {
-      return new AppError(ErrorCode.NETWORK_CLIENT_ERROR, message !== undefined ? message : `Client error: ${status}`);
+      return new AppError(ErrorCode.NETWORK_CLIENT_ERROR, message ?? `Client error: ${status}`);
     }
-    return new AppError(ErrorCode.UNKNOWN, message !== undefined ? message : 'Unknown error');
+    return new AppError(ErrorCode.UNKNOWN, message ?? 'Unknown error');
   }
 
   static unknown(cause?: Error): AppError {
     const options: AppErrorOptions = { cause: cause };
     return new AppError(
       ErrorCode.UNKNOWN,
-      cause?.message !== undefined ? cause.message : 'Unknown error',
+      cause?.message ?? 'Unknown error',
       undefined,
       options
     );

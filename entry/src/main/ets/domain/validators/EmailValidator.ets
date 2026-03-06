@@ -97,7 +97,7 @@ export class EmailValidator {
 
     // Check for @ symbol
     const matches = trimmedEmail.match(/@/g);
-    const atCount = matches !== null ? matches.length : 0;
+    const atCount = matches?.length ?? 0;
     if (atCount === 0) {
       const result: EmailValidationResult = {
         isValid: false,
@@ -176,7 +176,7 @@ export class EmailValidator {
     if (result.isValid && result.normalizedEmail !== undefined) {
       return new Success<string>(result.normalizedEmail);
     }
-    const errorMsg = result.error !== undefined ? EmailValidator.getErrorMessage(result.error) : 'Invalid email';
+    const errorMsg = result.error === undefined ? 'Invalid email' : EmailValidator.getErrorMessage(result.error);
     return new Failure<string>(errorMsg);
   }
 

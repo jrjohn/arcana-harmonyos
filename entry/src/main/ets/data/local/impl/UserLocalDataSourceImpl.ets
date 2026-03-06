@@ -5,7 +5,7 @@
 
 import { preferences } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
-import { injectable, preDestroy } from '../../core/di/decorators';
+import { injectable } from '../../core/di/decorators';
 import { IUserLocalDataSource, ILogger } from '../../core/di/interfaces';
 import { LocalUser, SyncStatus } from '../../domain/models/User';
 

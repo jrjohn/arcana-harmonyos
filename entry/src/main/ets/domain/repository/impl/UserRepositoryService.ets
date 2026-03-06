@@ -4,7 +4,7 @@
  * Follows offline-first pattern with local database as single source of truth
  */
 
-import { injectable, inject, preDestroy } from '../../core/di/decorators';
+import { injectable, preDestroy } from '../../core/di/decorators';
 import {
   IUserRepositoryService,
   IUserApiService,
@@ -12,7 +12,6 @@ import {
   ILogger,
   INetworkMonitor
 } from '../../core/di/interfaces';
-import { TYPES } from '../../core/di/tokens';
 import {
   User,
   UserImpl,
