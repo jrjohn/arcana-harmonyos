@@ -10,9 +10,7 @@ import { IAnalyticsService, ILogger } from '../di/interfaces';
 import {
   AppRoute,
   Routes,
-  UserListRoute,
   UserDetailRoute,
-  CreateUserRoute,
   EditUserRoute,
   RouteType
 } from './Routes';

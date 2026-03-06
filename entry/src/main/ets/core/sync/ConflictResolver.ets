@@ -185,7 +185,7 @@ export class ConflictResolver {
     for (const local of localUsers) {
       const remote = remoteMap.get(local.id);
 
-      if (!remote) {
+      if (!remote) { // NOSONAR javascript:S7735
         // User only exists locally
         localOnly.push(local);
         Logger.d(TAG, `User ${local.id} only exists locally`);

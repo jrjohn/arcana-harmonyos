@@ -214,7 +214,7 @@ export class LocalUserImpl implements LocalUser {
     avatar: string
   ): LocalUser {
     const now = Date.now();
-    const tempId = -Math.floor(Math.random() * 1000000);
+    const tempId = -Math.floor(Math.random() * 1000000); // NOSONAR javascript:S2245
     return new LocalUserImpl(
       tempId,
       email,

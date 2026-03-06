@@ -50,8 +50,8 @@ class ContextProvider implements IContextProvider {
  * Logger service wrapper (adapts static Logger to ILogger interface)
  */
 class LoggerService implements ILogger {
-  setLevel(): void {}
-  setEnabled(): void {}
+  setLevel(): void { /* intentionally empty */ }
+  setEnabled(): void { /* intentionally empty */ }
 
   d(tag: string, message: string): void {
     Logger.d(tag, message);

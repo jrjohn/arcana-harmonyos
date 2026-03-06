@@ -4,9 +4,8 @@
  */
 
 import { connection } from '@kit.NetworkKit';
-import { injectable, inject, postConstruct, preDestroy } from '../di/decorators';
+import { injectable, postConstruct, preDestroy } from '../di/decorators';
 import { INetworkMonitor, ILogger } from '../di/interfaces';
-import { TYPES } from '../di/tokens';
 import { NetworkStatus, NetworkType, NetworkState, NetworkStateCallback } from './NetworkMonitor';
 
 const TAG = 'NetworkMonitorService';

@@ -117,7 +117,7 @@ export class LoggerService implements ILogger {
     args.forEach((arg, index) => {
       const placeholder = `{${index}}`;
       if (result.includes(placeholder)) {
-        result = result.replace(placeholder, String(arg));
+        result = result.replace(placeholder, typeof arg === 'object' ? JSON.stringify(arg) : String(arg));
       }
     });
 

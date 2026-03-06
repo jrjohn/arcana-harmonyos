@@ -7,7 +7,7 @@
  * Compare with traditional UserApiServiceImpl to see the reduction in boilerplate.
  */
 
-import { ApiClient, ApiClientBuilder } from '../../core/http/ApiClient';
+import { ApiClient } from '../../core/http/ApiClient';
 import { Endpoint, ExecutableEndpoint, ExecutableEndpointWithBody, ExecutableVoidEndpoint } from '../../core/http/ApiEndpoint';
 import { User, CreateUserRequest, UpdateUserRequest, PaginatedUsers, PaginatedUsersImpl, UserImpl } from '../../domain/models/User';
 import {
@@ -72,7 +72,7 @@ class UserResponseMappers {
   static mapCreateResponse(raw: Object, request: CreateUserRequest): User {
     const response = raw as CreateUserResponseDto;
     return new UserImpl(
-      parseInt(response.id, 10),
+      Number.parseInt(response.id, 10),
       response.email || request.email,
       response.first_name || request.firstName,
       response.last_name || request.lastName,

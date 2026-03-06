@@ -5,8 +5,8 @@
  */
 
 import { common } from '@kit.AbilityKit';
-import { AppContainer, getContainer, inject } from './AppContainer';
-import { TYPES } from './tokens';
+import { AppContainer } from './AppContainer';
+
 import { IUserRepositoryService, ISyncManager, IAnalyticsService } from './interfaces';
 import { Logger } from '../logging/Logger';
 
@@ -19,7 +19,7 @@ const TAG = 'AppInitializer';
  * @deprecated Use AppContainer directly for new code.
  * This class is kept for backward compatibility during migration.
  */
-export class AppInitializer {
+export class AppInitializer { // NOSONAR javascript:S1874
   private static instance: AppInitializer | null = null;
   private container: AppContainer;
 
@@ -107,4 +107,5 @@ export class AppInitializer {
 }
 
 // Re-export container functions for convenience
-export { getContainer, inject, TYPES };
+export { getContainer, inject } from './AppContainer';
+export { TYPES } from './tokens';

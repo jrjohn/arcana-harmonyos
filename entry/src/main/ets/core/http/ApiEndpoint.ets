@@ -15,7 +15,7 @@
  * ```
  */
 
-import { ApiClient, HttpMethod, ResponseMapper } from './ApiClient';
+import { ApiClient, ResponseMapper } from './ApiClient';
 import { Result } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
 

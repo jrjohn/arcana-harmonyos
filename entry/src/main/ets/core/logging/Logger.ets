@@ -131,7 +131,7 @@ export class Logger {
    * Logs an exception with stack trace
    */
   static exception(tag: string, message: string, error: Error): void {
-    const stack = error.stack !== undefined ? error.stack : 'N/A';
+    const stack = error.stack ?? 'N/A';
     const errorMessage = `${message}\nError: ${error.message}\nStack: ${stack}`;
     Logger.e(tag, errorMessage);
   }
@@ -144,7 +144,7 @@ export class Logger {
       try {
         const json = JSON.stringify(data, null, 2);
         Logger.d(tag, `${label}: ${json}`);
-      } catch (e) {
+      } catch (_e) {
         Logger.d(tag, `${label}: [Unable to stringify]`);
       }
     }

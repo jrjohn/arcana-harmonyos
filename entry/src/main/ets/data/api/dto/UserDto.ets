@@ -125,7 +125,7 @@ export class UserDtoMapper {
       email: request.email,
       first_name: request.firstName,
       last_name: request.lastName,
-      avatar: request.avatar !== '' ? request.avatar : undefined
+      avatar: request.avatar === '' ? undefined : request.avatar
     };
     return dto;
   }
@@ -138,7 +138,7 @@ export class UserDtoMapper {
       email: request.email,
       first_name: request.firstName,
       last_name: request.lastName,
-      avatar: request.avatar !== '' ? request.avatar : undefined
+      avatar: request.avatar === '' ? undefined : request.avatar
     };
     return dto;
   }
@@ -148,10 +148,10 @@ export class UserDtoMapper {
    */
   static createResponseToDomain(response: CreateUserResponseDto, request: CreateUserRequest): User {
     return UserImpl.create(
-      parseInt(response.id, 10),
-      response.email !== undefined ? response.email : request.email,
-      response.first_name !== undefined ? response.first_name : request.firstName,
-      response.last_name !== undefined ? response.last_name : request.lastName,
+      Number.parseInt(response.id, 10),
+      response.email ?? request.email,
+      response.first_name ?? request.firstName,
+      response.last_name ?? request.lastName,
       response.avatar !== undefined ? response.avatar : (request.avatar !== undefined ? request.avatar : '')
     );
   }
@@ -162,9 +162,9 @@ export class UserDtoMapper {
   static updateResponseToDomain(response: UpdateUserResponseDto, request: UpdateUserRequest): User {
     return UserImpl.create(
       request.id,
-      response.email !== undefined ? response.email : request.email,
-      response.first_name !== undefined ? response.first_name : request.firstName,
-      response.last_name !== undefined ? response.last_name : request.lastName,
+      response.email ?? request.email,
+      response.first_name ?? request.firstName,
+      response.last_name ?? request.lastName,
       response.avatar !== undefined ? response.avatar : (request.avatar !== undefined ? request.avatar : '')
     );
   }

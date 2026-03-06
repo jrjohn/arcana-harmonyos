@@ -4,16 +4,16 @@
  */
 
 import { common } from '@kit.AbilityKit';
-import { NetworkState, NetworkStatus, NetworkStateCallback } from '../network/NetworkMonitor';
+import { NetworkState, NetworkStateCallback } from '../network/NetworkMonitor';
 import { SyncState, SyncStateCallback, SyncUnsubscribeCallback } from '../sync/SyncManager';
 import { LogLevel } from '../logging/Logger';
-import { AnalyticsEvent, AnalyticsProps, AnalyticsTimer } from '../analytics/AnalyticsService';
+import { AnalyticsProps, AnalyticsTimer } from '../analytics/AnalyticsService';
 import { User, CreateUserRequest, UpdateUserRequest, PaginatedUsers, LocalUser, SyncStatus } from '../../domain/models/User';
 import { Result } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
 import { ValueUnsubscribe } from '../../data/cache/ObservableCache';
 
-export { AnalyticsProps };
+export type { AnalyticsProps } from '../analytics/AnalyticsService';
 
 // ===== Network Monitor Interface =====
 

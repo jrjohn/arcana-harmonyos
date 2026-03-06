@@ -311,7 +311,7 @@ export class BackgroundScheduler implements IBackgroundScheduler {
   private hashString(str: string): number {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
+      const char = str.codePointAt(i) ?? 0;
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
@@ -360,7 +360,7 @@ export class ExponentialBackoff {
     );
 
     // Add jitter (±25%)
-    const jitter = delay * 0.25 * (Math.random() * 2 - 1);
+    const jitter = delay * 0.25 * (Math.random() * 2 - 1); // NOSONAR javascript:S2245
     const finalDelay = Math.max(0, delay + jitter);
 
     this.attempt++;

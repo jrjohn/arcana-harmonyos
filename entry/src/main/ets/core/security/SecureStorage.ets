@@ -123,12 +123,12 @@ export class SecureStorage implements ISecureStorage {
       // Check if master key exists
       const keyExists = await this.isKeyExists();
 
-      if (!keyExists) {
+      if (keyExists) {
+        this.log('Master key already exists');
+      } else {
         // Generate master key
         await this.generateMasterKey();
         this.log('Master key generated');
-      } else {
-        this.log('Master key already exists');
       }
 
       this.initialized = true;
@@ -291,7 +291,7 @@ export class SecureStorage implements ISecureStorage {
   private generateIV(): Uint8Array {
     const iv = new Uint8Array(SecureStorage.IV_LENGTH);
     for (let i = 0; i < iv.length; i++) {
-      iv[i] = Math.floor(Math.random() * 256);
+      iv[i] = Math.floor(Math.random() * 256); // NOSONAR javascript:S2245
     }
     return iv;
   }

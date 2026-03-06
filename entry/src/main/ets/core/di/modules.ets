@@ -5,7 +5,7 @@
  */
 
 import { common } from '@kit.AbilityKit';
-import { IContainerModule, IAsyncContainerModule, ServiceIdentifier, IBindingTo } from './types';
+import { IContainerModule, IAsyncContainerModule } from './types';
 import { TYPES, MODULES } from './tokens';
 import {
   INetworkMonitor,

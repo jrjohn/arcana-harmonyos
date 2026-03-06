@@ -130,8 +130,7 @@ export class HttpInterceptor {
       const parsed: object = JSON.parse(body) as object;
       const pretty = JSON.stringify(parsed, null, 2);
       const lines = pretty.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (const line of lines) {
         if (line.length > 0) {
           Logger.i(TAG, `       ${line}`);
         }
@@ -140,8 +139,8 @@ export class HttpInterceptor {
       // Not JSON, log as-is
       const truncated = HttpInterceptor.truncateBody(body);
       const lines = truncated.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        Logger.i(TAG, `       ${lines[i]}`);
+      for (const line of lines) {
+        Logger.i(TAG, `       ${line}`);
       }
     }
   }
@@ -202,8 +201,8 @@ export class HttpInterceptor {
     if (error instanceof Error && error.stack) {
       Logger.e(TAG, `  ✗ STACK TRACE:`);
       const stackLines = error.stack.split('\n');
-      for (let i = 0; i < stackLines.length; i++) {
-        Logger.e(TAG, `       ${stackLines[i]}`);
+      for (const line of stackLines) {
+        Logger.e(TAG, `       ${line}`);
       }
     }
     Logger.e(TAG, separator);
@@ -286,7 +285,7 @@ export class InterceptedHttpClient {
       const duration = Date.now() - startTime;
 
       // Extract response body safely
-      let responseBody: string | undefined = undefined;
+      let responseBody: string | undefined;
       if (response.result !== null && response.result !== undefined) {
         if (typeof response.result === 'string') {
           responseBody = response.result;

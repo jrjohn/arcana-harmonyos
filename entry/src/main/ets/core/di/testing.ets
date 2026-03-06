@@ -127,7 +127,7 @@ export class MockNetworkMonitor implements INetworkMonitor {
     };
   }
 
-  async initialize(): Promise<void> {}
+  async initialize(): Promise<void> { /* intentionally empty */ }
 
   async isNetworkAvailable(): Promise<boolean> {
     return this.isOnline;
@@ -189,7 +189,7 @@ export class MockSyncManager implements ISyncManager {
     this.syncTriggerCount++;
   }
 
-  async scheduleBackgroundSync(): Promise<void> {}
+  async scheduleBackgroundSync(): Promise<void> { /* intentionally empty */ }
 
   destroy(): void {
     this.callbacks.clear();
@@ -211,7 +211,7 @@ export class MockAnalyticsService implements IAnalyticsService {
   events: { type: string; name: string; properties?: Record<string, string | number | boolean> }[] = [];
   screens: string[] = [];
 
-  async initialize(): Promise<void> {}
+  async initialize(): Promise<void> { /* intentionally empty */ }
 
   trackScreen(screenName: string, _screenClass?: string): void {
     this.screens.push(screenName);
@@ -237,17 +237,17 @@ export class MockAnalyticsService implements IAnalyticsService {
     return () => {};
   }
 
-  async flush(): Promise<void> {}
+  async flush(): Promise<void> { /* intentionally empty */ }
 
   getSessionDuration(): number {
     return 0;
   }
 
   getCurrentScreen(): string | undefined {
-    return this.screens[this.screens.length - 1];
+    return this.screens.at(-1);
   }
 
-  destroy(): void {}
+  destroy(): void { /* intentionally empty */ }
 
   // Test helpers
   clear(): void {
@@ -375,7 +375,7 @@ export class MockUserLocalDataSource implements IUserLocalDataSource {
   private users: LocalUser[] = [];
   private lastSyncTime?: number;
 
-  async initialize(): Promise<void> {}
+  async initialize(): Promise<void> { /* intentionally empty */ }
 
   async getAllUsers(): Promise<LocalUser[]> {
     return [...this.users];

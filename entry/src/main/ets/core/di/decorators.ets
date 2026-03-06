@@ -9,9 +9,7 @@
 import {
   ServiceIdentifier,
   InjectableMetadata,
-  PropertyInjectionMetadata,
-  INJECTABLE_METADATA_KEY,
-  PROPERTY_INJECTION_KEY
+  PropertyInjectionMetadata
 } from './types';
 
 /**

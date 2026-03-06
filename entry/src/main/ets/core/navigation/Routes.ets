@@ -40,8 +40,8 @@ export class UserDetailParams implements RouteParams {
   }
 
   static fromRecord(record: Record<string, string>): UserDetailParams {
-    const userId = parseInt(record['userId'] || '0', 10);
-    if (isNaN(userId) || userId <= 0) {
+    const userId = Number.parseInt(record['userId'] || '0', 10);
+    if (Number.isNaN(userId) || userId <= 0) {
       throw new Error(`Invalid userId: ${record['userId']}`);
     }
     return new UserDetailParams(userId);
@@ -63,8 +63,8 @@ export class EditUserParams implements RouteParams {
   }
 
   static fromRecord(record: Record<string, string>): EditUserParams {
-    const userId = parseInt(record['userId'] || '0', 10);
-    if (isNaN(userId) || userId <= 0) {
+    const userId = Number.parseInt(record['userId'] || '0', 10);
+    if (Number.isNaN(userId) || userId <= 0) {
       throw new Error(`Invalid userId: ${record['userId']}`);
     }
     return new EditUserParams(userId);

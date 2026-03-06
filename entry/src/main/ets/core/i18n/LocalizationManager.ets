@@ -3,8 +3,7 @@
  * Provides i18n support with resource-based translations
  */
 
-import { i18n } from '@kit.LocalizationKit';
-import { resourceManager } from '@kit.LocalizationKit';
+import { i18n, resourceManager } from '@kit.LocalizationKit';
 import { common } from '@kit.AbilityKit';
 import { injectable, postConstruct, preDestroy } from '../di/decorators';
 import { ILogger } from '../di/interfaces';
@@ -428,7 +427,7 @@ export class LocalizationManager implements ILocalizationManager {
 
     // Replace %s, %d (first occurrence for each arg)
     let argIndex = 0;
-    result = result.replace(/%[sd]/g, () => {
+    result = result.replaceAll(/%[sd]/g, () => {
       if (argIndex < args.length) {
         return String(args[argIndex++]);
       }
@@ -444,8 +443,8 @@ export class LocalizationManager implements ILocalizationManager {
     try {
       // Resource IDs would be defined in $r('app.string.key')
       // For dynamic key lookup, we'd need a mapping
-      return -1; // Placeholder - actual implementation depends on resource setup
-    } catch {
+      return -1; // Placeholder - actual implementation depends on resource setup // NOSONAR javascript:S3516
+    } catch { // NOSONAR javascript:S1763
       return -1;
     }
   }

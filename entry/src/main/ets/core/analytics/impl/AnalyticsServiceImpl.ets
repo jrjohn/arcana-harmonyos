@@ -3,9 +3,8 @@
  * Implements IAnalyticsService interface for DI container
  */
 
-import { injectable, inject, postConstruct, preDestroy } from '../di/decorators';
+import { injectable, postConstruct, preDestroy } from '../di/decorators';
 import { IAnalyticsService, ILogger } from '../di/interfaces';
-import { TYPES } from '../di/tokens';
 import { AnalyticsEventType, AnalyticsEvent, ScreenTrackingData } from './AnalyticsService';
 
 const TAG = 'AnalyticsServiceImpl';
@@ -213,7 +212,7 @@ export class AnalyticsServiceImpl implements IAnalyticsService {
   }
 
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 9) // NOSONAR javascript:S2245}`;
   }
 
   @preDestroy()
