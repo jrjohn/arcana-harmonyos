@@ -2,16 +2,22 @@
 module.exports = {
   testEnvironment: 'node',
 
-  // Recognize .ets as TypeScript
+  // Recognize .ets as a loadable extension
   moduleFileExtensions: ['ets', 'ts', 'tsx', 'js', 'jsx', 'json'],
 
-  // Transform .ets and .ts via ts-jest (diagnostics: false = transpile-only, no type errors for .ets resolution)
+  // Transform .ets with our custom transformer (uses ts.transpileModule directly)
+  // Transform .ts with ts-jest
   transform: {
-    '^.+\\.(ets|ts)$': ['ts-jest', {
+    '\\.ets$': '<rootDir>/scripts/ets-transformer.js',
+    '\\.ts$': ['ts-jest', {
       tsconfig: 'tsconfig.jest.json',
-      diagnostics: false,  // Skip TS type-checking; Jest resolver handles .ets via moduleFileExtensions
+      diagnostics: false,
+      isolatedModules: true,
     }],
   },
+
+  // Ensure all files (including .ets) are transformed — do not ignore any project files
+  transformIgnorePatterns: ['<rootDir>/node_modules/'],
 
   // Map HarmonyOS-specific modules to shims/mocks
   moduleNameMapper: {
@@ -23,7 +29,8 @@ module.exports = {
   // Test files: our single aggregator
   testMatch: ['<rootDir>/jest-tests/**/*.test.ts'],
 
-  // Coverage: collect from main source, exclude UI layers
+  // Coverage: use V8 (no Babel instrumentation → no ArkTS syntax errors)
+  coverageProvider: 'v8',
   collectCoverage: true,
   collectCoverageFrom: [
     'entry/src/main/ets/**/*.ets',
@@ -33,6 +40,6 @@ module.exports = {
     '!entry/src/main/ets/presentation/components/**',
     '!entry/src/main/ets/workers/**',
   ],
-  coverageReporters: ['lcov', 'text-summary', 'text'],
+  coverageReporters: ['lcov', 'text-summary'],
   coverageDirectory: 'coverage/jest',
 };
