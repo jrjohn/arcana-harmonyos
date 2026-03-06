@@ -31,6 +31,12 @@ pipeline {
                             sed -i "s|\\.ts$|.ets|g; s|\\.ts:|.ets:|g" coverage/jest/lcov.info
                         fi
                     '''
+                    // Remove .ts copies BEFORE SonarQube scan to avoid language detection conflicts
+                    // (.ts files conflict with sonar's JS+TS pattern matchers for .ets files)
+                    sh '''
+                        find entry/src/main/ets -name "*.ts" -delete
+                        find entry/src/ohosTest/ets/test -name "*.ts" -delete
+                    '''
                 }
             }
         }
@@ -43,7 +49,6 @@ pipeline {
                                 -Dsonar.projectKey=harmonyos-app \
                                 -Dsonar.projectName="HarmonyOS App" \
                                 -Dsonar.sources=entry/src/main/ets \
-                                -Dsonar.javascript.file.suffixes=.js,.jsx,.ts,.tsx,.ets \
                                 -Dsonar.exclusions="**/node_modules/**,**/oh_modules/**,**/build/**,**/coverage/**" \
                                 -Dsonar.javascript.lcov.reportPaths=coverage/jest/lcov.info \
                                 -Dsonar.scm.disabled=true'''
