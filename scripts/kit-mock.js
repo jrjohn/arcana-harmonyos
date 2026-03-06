@@ -1,42 +1,43 @@
 /**
  * Generic HarmonyOS @kit.* module mock.
- * Returns a Proxy that provides no-op implementations for all accessed symbols.
- * This allows source files that import @kit.* to be loaded in Node.js/Jest.
+ * Returns a Proxy that provides callable no-op implementations for any depth of access.
+ * All property accesses return Proxies that are both callable AND have further properties.
  */
 'use strict';
 
+const SKIP_PROPS = new Set([
+  '__esModule', 'then', 'catch', 'finally',
+  Symbol.iterator, Symbol.toPrimitive, Symbol.toStringTag,
+]);
+
 /**
- * Creates a deep Proxy that returns no-op functions for any access.
+ * Creates a deeply callable Proxy mock.
+ * Every property access returns another such mock.
+ * Every call invocation returns another such mock.
  */
-function createMock(name) {
-  return new Proxy(
-    {},
-    {
-      get(_target, prop) {
-        if (prop === '__esModule') return true;
-        if (prop === 'default') return createMock(`${name}.default`);
-        if (prop === Symbol.iterator) return undefined;
-        if (prop === Symbol.toPrimitive) return undefined;
-        if (prop === 'then') return undefined; // prevent thenable detection
-        // Return a callable Proxy for everything else
-        return new Proxy(function mockFn() {
-          return createMock(`${name}.${String(prop)}.return`);
-        }, {
-          get(_fn, innerProp) {
-            if (innerProp === '__esModule') return true;
-            if (innerProp === 'then') return undefined;
-            if (innerProp === Symbol.iterator) return undefined;
-            return createMock(`${name}.${String(prop)}.${String(innerProp)}`);
-          },
-          construct(_fn, _args) {
-            return createMock(`${name}.${String(prop)}.instance`);
-          }
-        });
-      },
-      set() { return true; },
-      has() { return true; },
-    }
-  );
+function createMock() {
+  // Use a function as the proxy target so the proxy is always callable
+  const fn = function mockKitFn() {
+    return createMock();
+  };
+
+  return new Proxy(fn, {
+    get(_target, prop) {
+      if (SKIP_PROPS.has(prop)) return undefined;
+      if (prop === '__esModule') return true;
+      if (prop === 'default') return createMock();
+      // Return a callable mock for any property
+      return createMock();
+    },
+    apply(_target, _thisArg, _args) {
+      return createMock();
+    },
+    construct(_target, _args) {
+      return createMock();
+    },
+    set() { return true; },
+    has() { return true; },
+  });
 }
 
-module.exports = createMock('@kit');
+module.exports = createMock();
