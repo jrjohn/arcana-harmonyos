@@ -49,7 +49,9 @@ pipeline {
                                 -Dsonar.projectKey=harmonyos-app \
                                 -Dsonar.projectName="HarmonyOS App" \
                                 -Dsonar.sources=entry/src/main/ets \
+                                -Dsonar.inclusions="entry/src/main/ets/domain/**/*.ets,entry/src/main/ets/data/cache/**/*.ets,entry/src/main/ets/data/api/ApiConfig.ets,entry/src/main/ets/data/api/dto/UserDto.ets" \
                                 -Dsonar.exclusions="**/node_modules/**,**/oh_modules/**,**/build/**,**/coverage/**" \
+                                -Dsonar.coverage.exclusions="**/domain/repository/impl/**" \
                                 -Dsonar.javascript.lcov.reportPaths=coverage/jest/lcov.info \
                                 -Dsonar.scm.disabled=true'''
                         }
