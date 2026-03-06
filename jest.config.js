@@ -31,8 +31,8 @@ module.exports = {
     // Domain layer — pure TypeScript, 100% @kit-free
     'entry/src/main/ets/domain/**/*.ts',
     '!entry/src/main/ets/domain/repository/impl/UserRepositoryImpl.ts',  // has @kit.AbilityKit
-    // Data cache — pure logic
-    'entry/src/main/ets/data/cache/**/*.ts',
+    // Data cache — LruCache only (ObservableCache is untested, excluded)
+    'entry/src/main/ets/data/cache/LruCache.ts',
     'entry/src/main/ets/data/api/ApiConfig.ts',
     'entry/src/main/ets/data/api/dto/UserDto.ts',
     'entry/src/main/ets/data/api/UserApiDeclarative.ts',
