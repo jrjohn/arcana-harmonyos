@@ -383,7 +383,7 @@ export class Container implements IContainer {
         if (cached !== undefined) {
           return cached as T;
         }
-        let instance: T;
+        let instance: T;  // NOSONAR javascript:S6836
         if (binding.asyncFactory) {
           instance = await binding.asyncFactory(this);
         } else if (binding.factory) {

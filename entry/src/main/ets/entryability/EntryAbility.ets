@@ -47,7 +47,9 @@ export default class EntryAbility extends UIAbility {
       });
     };
 
-    if (this.initPromise !== null) {
+    if (this.initPromise === null) {
+      loadPage();
+    } else {
       this.initPromise.then(() => {
         hilog.info(DOMAIN, TAG, 'Initialization complete, loading page');
         loadPage();
@@ -56,8 +58,6 @@ export default class EntryAbility extends UIAbility {
         // Load page anyway to show error state
         loadPage();
       });
-    } else {
-      loadPage();
     }
   }
 

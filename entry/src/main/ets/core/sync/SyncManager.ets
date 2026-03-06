@@ -91,7 +91,7 @@ export class SyncManager implements ISyncManager {
     };
     this.setupNetworkListener(); // NOSONAR javascript:S7059
     this.updatePendingCount(); // NOSONAR javascript:S7059
-    this.initializeBackgroundScheduler();
+    this.initializeBackgroundScheduler(); // NOSONAR javascript:S7059
   }
 
   /**

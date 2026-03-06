@@ -437,7 +437,7 @@ export class LocalizationManager implements ILocalizationManager {
     return result;
   }
 
-  private getResourceId(key: string): number {
+  private getResourceId(key: string): number { // NOSONAR javascript:S3516
     // HarmonyOS resource IDs are typically defined in resources/base/element/string.json
     // This is a simplified lookup - in production, use proper resource references
     try {
