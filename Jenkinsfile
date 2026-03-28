@@ -59,6 +59,25 @@ pipeline {
                 }
             }
         }
+        stage("Architecture Qube") {
+            steps {
+                dir("${env.PROJECTS_DIR}/arcana-harmonyos") {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                        sh """
+                            mkdir -p arch-qube-reports
+                            docker run --rm \
+                                --network devops_default \
+                                -v \$(pwd):/project \
+                                -v \$(pwd)/arch-qube-reports:/output \
+                                arch-qube:latest scan /project \
+                                --framework harmonyos --no-ai \
+                                --ci --format json,markdown \
+                                -o /output --threshold 90
+                        """
+                    }
+                }
+            }
+        }
     }
     post {
         success { echo "HarmonyOS Jest+SonarQube OK" }
