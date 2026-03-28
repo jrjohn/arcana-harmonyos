@@ -11,6 +11,7 @@ import { RdbStoreManager } from './RdbStoreManager';
 import { UserLocalDataSourceRdb } from './UserLocalDataSourceRdb';
 import { LocalUser, LocalUserImpl, SyncStatus } from '../../domain/models/User';
 import { ILogger } from '../../core/di/interfaces';
+import { Logger } from '../../core/logging/Logger';
 
 const TAG = 'DataMigration';
 const PREFERENCES_NAME = 'arcana_users';
@@ -249,7 +250,7 @@ export class DataMigration {
     if (this.logger) {
       this.logger.i(TAG, message);
     } else {
-      console.info(`${TAG}: ${message}`);
+      Logger.i(TAG, message);
     }
   }
 
@@ -257,7 +258,7 @@ export class DataMigration {
     if (this.logger) {
       this.logger.e(TAG, message);
     } else {
-      console.error(`${TAG}: ${message}`);
+      Logger.e(TAG, message);
     }
   }
 }

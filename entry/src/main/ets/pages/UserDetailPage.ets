@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { User, UserFactory } from '../domain/models/User';
 import { UserDetailViewModel, UserDetailState, UserDetailInput, UserDetailEffect } from '../presentation/viewmodel/UserDetailViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
@@ -100,7 +99,7 @@ struct UserDetailPage {
         try {
           this.getUIContext().getRouter().back();
         } catch (err) {
-          console.error(`back error: ${err}`);
+          Logger.e(TAG, `back error: ${err}`);
         }
         break;
 
@@ -111,7 +110,7 @@ struct UserDetailPage {
             params: { userId: effect.userId }
           });
         } catch (err) {
-          console.error(`pushUrl error: ${err}`);
+          Logger.e(TAG, `pushUrl error: ${err}`);
         }
         break;
 
@@ -122,7 +121,7 @@ struct UserDetailPage {
             duration: 2000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
 
@@ -133,7 +132,7 @@ struct UserDetailPage {
             duration: 3000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
 
@@ -262,10 +261,10 @@ struct UserDetailPage {
           this.sendEvent({ type: 'ConfirmDelete' });
         }
       }).catch((err: Error) => {
-        console.error(`showDialog error: ${err.message}`);
+        Logger.e(TAG, `showDialog error: ${err.message}`);
       });
     } catch (err) {
-      console.error(`showDialog exception: ${err}`);
+      Logger.e(TAG, `showDialog exception: ${err}`);
     }
   }
 

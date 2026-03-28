@@ -1,3 +1,5 @@
+import { Logger } from '../logging/Logger';
+
 /**
  * SyncExecutor - Standalone sync executor for background operations
  *
@@ -42,7 +44,7 @@ export class SyncExecutor {
   private readonly maxRetries = 3;
 
   constructor() {
-    console.info(`${TAG}: SyncExecutor created`);
+    Logger.i(TAG, `SyncExecutor created`);
   }
 
   /**
@@ -54,20 +56,20 @@ export class SyncExecutor {
    */
   async executePendingSync(): Promise<SyncResult> {
     const startTime = Date.now();
-    console.info(`${TAG}: Starting pending sync execution`);
+    Logger.i(TAG, `Starting pending sync execution`);
 
     try {
       // In background worker context, we have limited access
       // Log the sync attempt and return success
       // The actual sync will be performed by SyncManager when app is active
 
-      console.info(`${TAG}: Background sync check completed`);
+      Logger.i(TAG, `Background sync check completed`);
 
       // Return a result indicating the background check completed
       return this.createResult(0, 0, 0, startTime);
 
     } catch (error) {
-      console.error(`${TAG}: Sync execution failed: ${error}`);
+      Logger.e(TAG, `Sync execution failed: ${error}`);
       return this.createResult(0, 0, 0, startTime, String(error));
     }
   }
@@ -80,7 +82,7 @@ export class SyncExecutor {
    * Actual refresh is performed when app returns to foreground.
    */
   async refreshAllData(): Promise<void> {
-    console.info(`${TAG}: Data refresh requested (will execute on foreground)`);
+    Logger.i(TAG, `Data refresh requested (will execute on foreground)`);
   }
 
   /**
@@ -110,6 +112,6 @@ export class SyncExecutor {
    */
   destroy(): void {
     // Cleanup any resources if needed
-    console.info(`${TAG}: SyncExecutor destroyed`);
+    Logger.i(TAG, `SyncExecutor destroyed`);
   }
 }

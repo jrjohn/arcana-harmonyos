@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { User } from '../domain/models/User';
 import { UserListViewModel, UserListState, UserListInput, UserListEffect } from '../presentation/viewmodel/UserListViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
@@ -96,7 +95,7 @@ struct UserListPage {
             params: { userId: effect.userId }
           });
         } catch (err) {
-          console.error(`pushUrl error: ${err}`);
+          Logger.e(TAG, `pushUrl error: ${err}`);
         }
         break;
 
@@ -106,7 +105,7 @@ struct UserListPage {
             url: 'pages/CreateUserPage'
           });
         } catch (err) {
-          console.error(`pushUrl error: ${err}`);
+          Logger.e(TAG, `pushUrl error: ${err}`);
         }
         break;
 
@@ -121,7 +120,7 @@ struct UserListPage {
             duration: 2000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
 
@@ -132,7 +131,7 @@ struct UserListPage {
             duration: 3000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
     }
@@ -161,10 +160,10 @@ struct UserListPage {
           this.sendEvent({ type: 'ConfirmDeleteUser', userId: userId });
         }
       }).catch((err: Error) => {
-        console.error(`showDialog error: ${err.message}`);
+        Logger.e(TAG, `showDialog error: ${err.message}`);
       });
     } catch (err) {
-      console.error(`showDialog exception: ${err}`);
+      Logger.e(TAG, `showDialog exception: ${err}`);
     }
   }
 
@@ -193,7 +192,7 @@ struct UserListPage {
             try {
               this.getUIContext().getRouter().back();
             } catch (err) {
-              console.error(`back error: ${err}`);
+              Logger.e(TAG, `back error: ${err}`);
             }
           })
 

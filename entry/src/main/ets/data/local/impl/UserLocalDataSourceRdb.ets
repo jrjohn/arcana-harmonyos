@@ -13,6 +13,7 @@ import { relationalStore, ValuesBucket } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { injectable } from '../../core/di/decorators';
 import { IUserLocalDataSource, ILogger } from '../../core/di/interfaces';
+import { Logger } from '../../../core/logging/Logger';
 import { LocalUser, SyncStatus, LocalUserImpl } from '../../domain/models/User';
 import {
   RdbStoreManager,
@@ -522,7 +523,7 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
     if (this.logger) {
       this.logger.d(TAG, message);
     } else {
-      console.info(`${TAG}: ${message}`);
+      Logger.d(TAG, message);
     }
   }
 
@@ -530,7 +531,7 @@ export class UserLocalDataSourceRdb implements IUserLocalDataSource {
     if (this.logger) {
       this.logger.e(TAG, message);
     } else {
-      console.error(`${TAG}: ${message}`);
+      Logger.e(TAG, message);
     }
   }
 }

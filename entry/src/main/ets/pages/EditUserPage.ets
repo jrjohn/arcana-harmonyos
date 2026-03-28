@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
 import { UserFormViewModel, UserFormState, UserFormInput, UserFormEffect } from '../presentation/viewmodel/UserFormViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
@@ -122,7 +121,7 @@ struct EditUserPage {
         try {
           this.getUIContext().getRouter().back();
         } catch (err) {
-          console.error(`back error: ${err}`);
+          Logger.e(TAG, `back error: ${err}`);
         }
         break;
 
@@ -133,7 +132,7 @@ struct EditUserPage {
             duration: 2000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
 
@@ -144,7 +143,7 @@ struct EditUserPage {
             duration: 3000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
 
@@ -175,14 +174,14 @@ struct EditUserPage {
           try {
             this.getUIContext().getRouter().back();
           } catch (err) {
-            console.error(`back error: ${err}`);
+            Logger.e(TAG, `back error: ${err}`);
           }
         }
       }).catch((err: Error) => {
-        console.error(`showDialog error: ${err.message}`);
+        Logger.e(TAG, `showDialog error: ${err.message}`);
       });
     } catch (err) {
-      console.error(`showDialog exception: ${err}`);
+      Logger.e(TAG, `showDialog exception: ${err}`);
     }
   }
 

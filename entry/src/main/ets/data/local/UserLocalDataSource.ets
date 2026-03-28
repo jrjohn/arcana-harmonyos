@@ -294,7 +294,7 @@ export class UserLocalDataSource {
       const usersJson = await prefs.get(USERS_KEY, '[]') as string;
       return JSON.parse(usersJson) as LocalUser[];
     } catch (err) {
-      console.error(`getAllUsersInternal error: ${err}`);
+      Logger.e(TAG, `getAllUsersInternal error: ${err}`);
       return [];
     }
   }

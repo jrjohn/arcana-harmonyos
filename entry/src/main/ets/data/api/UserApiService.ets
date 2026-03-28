@@ -12,7 +12,6 @@ import { Result, ResultFactory } from '../../domain/models/Result';
 import { AppError, AppErrorFactory } from '../../domain/models/AppError';
 import { InterceptedHttpClient } from '../../core/network/HttpInterceptor';
 
-const TAG = 'UserApiService';
 
 /**
  * API service for user-related network operations.

@@ -19,6 +19,7 @@ import {
 } from './interfaces';
 
 // Import implementations
+import { Logger } from '../logging/Logger';
 import { LoggerService } from '../logging/impl/LoggerService';
 import { NetworkMonitorService } from '../network/impl/NetworkMonitorService';
 import { SyncManagerService } from '../sync/impl/SyncManagerService';
@@ -296,8 +297,8 @@ export class ContainerInitializer {
       const logger = this.container.get<ILogger>(TYPES.Logger);
       logger.d(TAG, message);
     } catch {
-      // Logger not yet bound, use console
-      console.debug(`[${TAG}] ${message}`);
+      // Logger not yet bound, use static Logger
+      Logger.d(TAG, message);
     }
   }
 
@@ -306,7 +307,7 @@ export class ContainerInitializer {
       const logger = this.container.get<ILogger>(TYPES.Logger);
       logger.e(TAG, message);
     } catch {
-      console.error(`[${TAG}] ${message}`);
+      Logger.e(TAG, message);
     }
   }
 }

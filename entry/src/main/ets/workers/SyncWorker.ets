@@ -11,6 +11,7 @@
  */
 
 import { WorkSchedulerExtensionAbility, workScheduler } from '@kit.BackgroundTasksKit';
+import { Logger } from '../core/logging/Logger';
 import { WorkType } from '../core/scheduling/BackgroundScheduler';
 import { SyncExecutor } from '../core/sync/SyncExecutor';
 import { CacheManager } from '../data/cache/LruCache';
@@ -26,7 +27,7 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
    * Maximum execution time: 2 minutes
    */
   onWorkStart(workInfo: workScheduler.WorkInfo): void {
-    console.info(`${TAG}: onWorkStart - workId: ${workInfo.workId}`);
+    Logger.i(TAG, `onWorkStart - workId: ${workInfo.workId}`);
 
     let workType: string = WorkType.SYNC;
     if (workInfo.parameters !== undefined) {
@@ -36,13 +37,13 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
       }
     }
 
-    console.info(`${TAG}: Executing work type: ${workType}`);
+    Logger.i(TAG, `Executing work type: ${workType}`);
 
     // Execute the appropriate work based on type
     this.executeWork(workType).then((success) => {
-      console.info(`${TAG}: Work completed - success: ${success}`);
+      Logger.i(TAG, `Work completed - success: ${success}`);
     }).catch((error: Error) => {
-      console.error(`${TAG}: Work failed - error: ${error.message}`);
+      Logger.e(TAG, `Work failed - error: ${error.message}`);
     });
   }
 
@@ -50,7 +51,7 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
    * Called when the work should stop (timeout, cancellation, or completion)
    */
   onWorkStop(workInfo: workScheduler.WorkInfo): void {
-    console.info(`${TAG}: onWorkStop - workId: ${workInfo.workId}`);
+    Logger.i(TAG, `onWorkStop - workId: ${workInfo.workId}`);
     // Cleanup any resources if needed
   }
 
@@ -73,11 +74,11 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
           return await this.performDataRefresh();
 
         default:
-          console.warn(`${TAG}: Unknown work type: ${workType}`);
+          Logger.w(TAG, `Unknown work type: ${workType}`);
           return false;
       }
     } catch (error) {
-      console.error(`${TAG}: executeWork failed: ${error}`);
+      Logger.e(TAG, `executeWork failed: ${error}`);
       return false;
     }
   }
@@ -86,16 +87,16 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
    * Perform sync of pending user data
    */
   private async performSync(): Promise<boolean> {
-    console.info(`${TAG}: Starting sync operation...`);
+    Logger.i(TAG, `Starting sync operation...`);
 
     try {
       const executor = new SyncExecutor();
       const result = await executor.executePendingSync();
 
-      console.info(`${TAG}: Sync completed - synced: ${result.syncedCount}, failed: ${result.failedCount}`);
+      Logger.i(TAG, `Sync completed - synced: ${result.syncedCount}, failed: ${result.failedCount}`);
       return result.failedCount === 0;
     } catch (error) {
-      console.error(`${TAG}: Sync failed: ${error}`);
+      Logger.e(TAG, `Sync failed: ${error}`);
       return false;
     }
   }
@@ -104,14 +105,14 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
    * Perform cache cleanup
    */
   private async performCacheCleanup(): Promise<boolean> {
-    console.info(`${TAG}: Starting cache cleanup...`);
+    Logger.i(TAG, `Starting cache cleanup...`);
 
     try {
-      const purgedCount = CacheManager.purgeAllExpired();
-      console.info(`${TAG}: Cache cleanup completed - purged: ${purgedCount} entries`);
+      CacheManager.purgeAllExpired();
+      Logger.i(TAG, `Cache cleanup completed`);
       return true;
     } catch (error) {
-      console.error(`${TAG}: Cache cleanup failed: ${error}`);
+      Logger.e(TAG, `Cache cleanup failed: ${error}`);
       return false;
     }
   }
@@ -120,15 +121,15 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
    * Perform analytics upload
    */
   private async performAnalyticsUpload(): Promise<boolean> {
-    console.info(`${TAG}: Starting analytics upload...`);
+    Logger.i(TAG, `Starting analytics upload...`);
 
     try {
       // Analytics upload would be implemented here
       // For now, just log completion
-      console.info(`${TAG}: Analytics upload completed`);
+      Logger.i(TAG, `Analytics upload completed`);
       return true;
     } catch (error) {
-      console.error(`${TAG}: Analytics upload failed: ${error}`);
+      Logger.e(TAG, `Analytics upload failed: ${error}`);
       return false;
     }
   }
@@ -137,16 +138,16 @@ export default class SyncWorker extends WorkSchedulerExtensionAbility {
    * Perform data refresh
    */
   private async performDataRefresh(): Promise<boolean> {
-    console.info(`${TAG}: Starting data refresh...`);
+    Logger.i(TAG, `Starting data refresh...`);
 
     try {
       const executor = new SyncExecutor();
       await executor.refreshAllData();
 
-      console.info(`${TAG}: Data refresh completed`);
+      Logger.i(TAG, `Data refresh completed`);
       return true;
     } catch (error) {
-      console.error(`${TAG}: Data refresh failed: ${error}`);
+      Logger.e(TAG, `Data refresh failed: ${error}`);
       return false;
     }
   }

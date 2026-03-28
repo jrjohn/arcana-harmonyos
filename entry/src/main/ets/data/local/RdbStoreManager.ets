@@ -8,6 +8,7 @@
  */
 
 import { common } from '@kit.AbilityKit';
+import { Logger } from '../../core/logging/Logger';
 import { BusinessError } from '@kit.BasicServicesKit';
 
 // Re-export for convenience
@@ -121,14 +122,14 @@ export class RdbStoreManager {
    */
   async initialize(context: common.UIAbilityContext): Promise<void> {
     if (this.isInitialized && this.store) {
-      console.info(`${TAG}: Already initialized`);
+      Logger.i(TAG, `Already initialized`);
       return;
     }
 
     this.context = context;
 
     try {
-      console.info(`${TAG}: Initializing database...`);
+      Logger.i(TAG, `Initializing database...`);
 
       const storeConfig: relationalStore.StoreConfig = {
         name: DB_CONFIG.NAME,
@@ -141,11 +142,11 @@ export class RdbStoreManager {
       await this.runMigrations();
 
       this.isInitialized = true;
-      console.info(`${TAG}: Database initialized successfully`);
+      Logger.i(TAG, `Database initialized successfully`);
     } catch (error) {
       const e = error as BusinessError;
       const message = `Failed to initialize database: ${e.message}`;
-      console.error(`${TAG}: ${message}`);
+      Logger.e(TAG, `${message}`);
       throw new Error(message);
     }
   }
@@ -175,18 +176,18 @@ export class RdbStoreManager {
     if (!this.store) return;
 
     const currentVersion = this.store.version;
-    console.info(`${TAG}: Current database version: ${currentVersion}`);
+    Logger.i(TAG, `Current database version: ${currentVersion}`);
 
     if (currentVersion === 0) {
       // Fresh install - create all tables
       await this.createTables();
       this.store.version = DB_CONFIG.VERSION;
-      console.info(`${TAG}: Database created with version ${DB_CONFIG.VERSION}`);
+      Logger.i(TAG, `Database created with version ${DB_CONFIG.VERSION}`);
     } else if (currentVersion < DB_CONFIG.VERSION) {
       // Run migrations
       await this.migrateDatabase(currentVersion, DB_CONFIG.VERSION);
       this.store.version = DB_CONFIG.VERSION;
-      console.info(`${TAG}: Database migrated to version ${DB_CONFIG.VERSION}`);
+      Logger.i(TAG, `Database migrated to version ${DB_CONFIG.VERSION}`);
     }
   }
 
@@ -196,28 +197,28 @@ export class RdbStoreManager {
   private async createTables(): Promise<void> {
     if (!this.store) return;
 
-    console.info(`${TAG}: Creating tables...`);
+    Logger.i(TAG, `Creating tables...`);
 
     // Create users table
     await this.store.executeSql(CREATE_USERS_TABLE);
-    console.info(`${TAG}: Created ${Tables.USERS} table`);
+    Logger.i(TAG, `Created ${Tables.USERS} table`);
 
     // Create sync metadata table
     await this.store.executeSql(CREATE_SYNC_METADATA_TABLE);
-    console.info(`${TAG}: Created ${Tables.SYNC_METADATA} table`);
+    Logger.i(TAG, `Created ${Tables.SYNC_METADATA} table`);
 
     // Create indexes
     for (const indexSql of CREATE_INDEXES) {
       await this.store.executeSql(indexSql);
     }
-    console.info(`${TAG}: Created indexes`);
+    Logger.i(TAG, `Created indexes`);
   }
 
   /**
    * Migrates database from one version to another
    */
   private async migrateDatabase(fromVersion: number, toVersion: number): Promise<void> {
-    console.info(`${TAG}: Migrating from version ${fromVersion} to ${toVersion}`);
+    Logger.i(TAG, `Migrating from version ${fromVersion} to ${toVersion}`);
 
     // Add migration logic here as schema evolves
     // Example:
@@ -236,9 +237,9 @@ export class RdbStoreManager {
         // The store is managed by the system
         this.store = null;
         this.isInitialized = false;
-        console.info(`${TAG}: Database closed`);
+        Logger.i(TAG, `Database closed`);
       } catch (error) {
-        console.error(`${TAG}: Error closing database: ${error}`);
+        Logger.e(TAG, `Error closing database: ${error}`);
       }
     }
   }
@@ -255,10 +256,10 @@ export class RdbStoreManager {
       await relationalStore.deleteRdbStore(this.context, DB_CONFIG.NAME);
       this.store = null;
       this.isInitialized = false;
-      console.info(`${TAG}: Database deleted`);
+      Logger.i(TAG, `Database deleted`);
     } catch (error) {
       const message = `Error deleting database: ${error}`;
-      console.error(`${TAG}: ${message}`);
+      Logger.e(TAG, `${message}`);
       throw new Error(message);
     }
   }

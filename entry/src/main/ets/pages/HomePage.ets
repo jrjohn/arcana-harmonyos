@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { HomeViewModel, HomeState, HomeInput, HomeEffect } from '../presentation/viewmodel/HomeViewModel';
 import { StateUnsubscribe, EffectUnsubscribe } from '../presentation/viewmodel/BaseViewModel';
 import { getContainer } from '../core/di/AppContainer';
@@ -89,7 +88,7 @@ struct HomePage {
             url: 'pages/UserListPage'
           });
         } catch (err) {
-          console.error(`pushUrl error: ${err}`);
+          Logger.e(TAG, `pushUrl error: ${err}`);
         }
         break;
 
@@ -100,7 +99,7 @@ struct HomePage {
             duration: 3000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
     }

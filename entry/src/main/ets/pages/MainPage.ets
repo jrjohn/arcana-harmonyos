@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { User } from '../domain/models/User';
 import { HomeViewModel, HomeState, HomeInput, HomeEffect } from '../presentation/viewmodel/HomeViewModel';
 import { UserListViewModel, UserListState, UserListInput, UserListEffect } from '../presentation/viewmodel/UserListViewModel';
@@ -160,7 +159,7 @@ struct MainPage {
             duration: 3000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
     }
@@ -175,7 +174,7 @@ struct MainPage {
             params: { userId: effect.userId }
           });
         } catch (err) {
-          console.error(`pushUrl error: ${err}`);
+          Logger.e(TAG, `pushUrl error: ${err}`);
         }
         break;
       case 'NavigateToCreate':
@@ -184,7 +183,7 @@ struct MainPage {
             url: 'pages/CreateUserPage'
           });
         } catch (err) {
-          console.error(`pushUrl error: ${err}`);
+          Logger.e(TAG, `pushUrl error: ${err}`);
         }
         break;
       case 'ShowDeleteConfirmation':
@@ -197,7 +196,7 @@ struct MainPage {
             duration: 2000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
       case 'ShowError':
@@ -207,7 +206,7 @@ struct MainPage {
             duration: 3000
           });
         } catch (err) {
-          console.error(`showToast error: ${err}`);
+          Logger.e(TAG, `showToast error: ${err}`);
         }
         break;
     }
@@ -234,10 +233,10 @@ struct MainPage {
           this.userListViewModel?.onEvent({ type: 'ConfirmDeleteUser', userId: userId });
         }
       }).catch((err: Error) => {
-        console.error(`showDialog error: ${err.message}`);
+        Logger.e(TAG, `showDialog error: ${err.message}`);
       });
     } catch (err) {
-      console.error(`showDialog exception: ${err}`);
+      Logger.e(TAG, `showDialog exception: ${err}`);
     }
   }
 
