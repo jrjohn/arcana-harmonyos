@@ -17,7 +17,7 @@ const TAG = 'SyncManagerService';
  * Injectable sync manager service implementation
  */
 @injectable()
-export class SyncManagerService implements ISyncManager {
+export class SyncManagerServiceImpl implements ISyncManager {
   private repository: IUserRepositoryService;
   private networkMonitor: INetworkMonitor;
   private logger: ILogger;

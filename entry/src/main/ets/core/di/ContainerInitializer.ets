@@ -20,13 +20,13 @@ import {
 
 // Import implementations
 import { Logger } from '../logging/Logger';
-import { LoggerService } from '../logging/impl/LoggerService';
-import { NetworkMonitorService } from '../network/impl/NetworkMonitorService';
-import { SyncManagerService } from '../sync/impl/SyncManagerService';
+import { LoggerServiceImpl } from '../logging/impl/LoggerServiceImpl';
+import { NetworkMonitorServiceImpl } from '../network/impl/NetworkMonitorServiceImpl';
+import { SyncManagerServiceImpl } from '../sync/impl/SyncManagerServiceImpl';
 import { AnalyticsServiceImpl } from '../analytics/impl/AnalyticsServiceImpl';
-import { UserRepositoryService } from '../../domain/repository/impl/UserRepositoryService';
+import { UserRepositoryServiceImpl } from '../../data/repository/UserRepositoryServiceImpl';
 import { UserApiServiceImpl } from '../../data/api/impl/UserApiServiceImpl';
-import { UserLocalDataSourceRdb } from '../../data/local/impl/UserLocalDataSourceRdb';
+import { UserLocalDataSourceRdbImpl } from '../../data/local/impl/UserLocalDataSourceRdbImpl';
 import { RdbStoreManager } from '../../data/local/RdbStoreManager';
 import { DataMigration } from '../../data/local/DataMigration';
 
@@ -124,12 +124,12 @@ export class ContainerInitializer {
       .toConstantValue(new ContextProviderImpl(this.context));
 
     // Logger (singleton)
-    const logger = new LoggerService();
+    const logger = new LoggerServiceImpl();
     this.container.bind<ILogger>(TYPES.Logger)
       .toConstantValue(logger);
 
     // Network monitor (singleton)
-    const networkMonitor = new NetworkMonitorService();
+    const networkMonitor = new NetworkMonitorServiceImpl();
     networkMonitor.setLogger(logger);
     this.container.bind<INetworkMonitor>(TYPES.NetworkMonitor)
       .toConstantValue(networkMonitor);
@@ -156,13 +156,13 @@ export class ContainerInitializer {
       .toConstantValue(apiService);
 
     // Local data source - using RDB (RelationalStore) implementation
-    const localDataSource = new UserLocalDataSourceRdb(this.context);
+    const localDataSource = new UserLocalDataSourceRdbImpl(this.context);
     localDataSource.setLogger(logger);
     this.container.bind<IUserLocalDataSource>(TYPES.UserLocalDataSource)
       .toConstantValue(localDataSource);
 
     // Repository (singleton)
-    const repository = new UserRepositoryService(apiService, localDataSource, logger);
+    const repository = new UserRepositoryServiceImpl(apiService, localDataSource, logger);
     const networkMonitor = this.container.get<INetworkMonitor>(TYPES.NetworkMonitor);
     repository.setNetworkMonitor(networkMonitor);
     this.container.bind<IUserRepositoryService>(TYPES.UserRepository)
@@ -180,7 +180,7 @@ export class ContainerInitializer {
     const logger = this.container.get<ILogger>(TYPES.Logger);
 
     // Sync manager (singleton)
-    const syncManager = new SyncManagerService(repository, networkMonitor, logger);
+    const syncManager = new SyncManagerServiceImpl(repository, networkMonitor, logger);
     this.container.bind<ISyncManager>(TYPES.SyncManager)
       .toConstantValue(syncManager);
 

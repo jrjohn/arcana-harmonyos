@@ -19,11 +19,11 @@ import {
 } from './interfaces';
 
 // Import implementations
-import { NetworkMonitorService } from '../network/impl/NetworkMonitorService';
-import { LoggerService } from '../logging/impl/LoggerService';
-import { SyncManagerService } from '../sync/impl/SyncManagerService';
+import { NetworkMonitorServiceImpl } from '../network/impl/NetworkMonitorServiceImpl';
+import { LoggerServiceImpl } from '../logging/impl/LoggerServiceImpl';
+import { SyncManagerServiceImpl } from '../sync/impl/SyncManagerServiceImpl';
 import { AnalyticsServiceImpl } from '../analytics/impl/AnalyticsServiceImpl';
-import { UserRepositoryService } from '../../domain/repository/impl/UserRepositoryService';
+import { UserRepositoryServiceImpl } from '../../data/repository/UserRepositoryServiceImpl';
 import { UserApiServiceImpl } from '../../data/api/impl/UserApiServiceImpl';
 import { UserLocalDataSourceImpl } from '../../data/local/impl/UserLocalDataSourceImpl';
 
@@ -57,12 +57,12 @@ export function createCoreModule(context: common.UIAbilityContext): IContainerMo
 
       // Logger (singleton)
       bind<ILogger>(TYPES.Logger)
-        .toDynamicValue(() => new LoggerService())
+        .toDynamicValue(() => new LoggerServiceImpl())
         .inSingletonScope();
 
       // Network monitor (singleton, requires async init)
       bind<INetworkMonitor>(TYPES.NetworkMonitor)
-        .toDynamicValue(() => new NetworkMonitorService())
+        .toDynamicValue(() => new NetworkMonitorServiceImpl())
         .inSingletonScope();
 
       // Analytics (singleton, requires async init)
@@ -100,7 +100,7 @@ export function createDataModule(): IContainerModule {
           const apiService = container.get<IUserApiService>(TYPES.UserApiService);
           const localDataSource = container.get<IUserLocalDataSource>(TYPES.UserLocalDataSource);
           const logger = container.get<ILogger>(TYPES.Logger);
-          return new UserRepositoryService(apiService, localDataSource, logger);
+          return new UserRepositoryServiceImpl(apiService, localDataSource, logger);
         })
         .inSingletonScope();
     }
@@ -121,7 +121,7 @@ export function createSyncModule(): IContainerModule {
           const repository = container.get<IUserRepositoryService>(TYPES.UserRepository);
           const networkMonitor = container.get<INetworkMonitor>(TYPES.NetworkMonitor);
           const logger = container.get<ILogger>(TYPES.Logger);
-          return new SyncManagerService(repository, networkMonitor, logger);
+          return new SyncManagerServiceImpl(repository, networkMonitor, logger);
         })
         .inSingletonScope();
     }

@@ -19,7 +19,7 @@ import {
 import { IUserService } from '../../domain/services/UserService';
 import { UserServiceImpl } from '../../domain/services/impl/UserServiceImpl';
 import { INavigator, Navigator } from '../navigation/Navigator';
-import { UserRepositoryImpl } from '../../domain/repository/impl/UserRepositoryImpl';
+import { UserRepositoryImpl } from '../../data/repository/UserRepositoryImpl';
 import { SyncManager } from '../sync/SyncManager';
 import { AnalyticsService } from '../analytics/AnalyticsService';
 import { Logger } from '../logging/Logger';

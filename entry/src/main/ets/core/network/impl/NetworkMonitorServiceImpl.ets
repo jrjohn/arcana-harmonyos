@@ -14,7 +14,7 @@ const TAG = 'NetworkMonitorService';
  * Injectable network monitor service implementation
  */
 @injectable()
-export class NetworkMonitorService implements INetworkMonitor {
+export class NetworkMonitorServiceImpl implements INetworkMonitor {
   private callbacks: Set<NetworkStateCallback> = new Set();
   private currentState: NetworkState = {
     status: NetworkStatus.UNKNOWN,

@@ -36,7 +36,7 @@ const TAG = 'UserRepositoryService';
  * Injectable user repository service implementation
  */
 @injectable()
-export class UserRepositoryService implements IUserRepositoryService {
+export class UserRepositoryServiceImpl implements IUserRepositoryService {
   private apiService: IUserApiService;
   private localDataSource: IUserLocalDataSource;
   private logger: ILogger;

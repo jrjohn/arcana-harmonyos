@@ -8,7 +8,7 @@
 import { preferences } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { RdbStoreManager } from './RdbStoreManager';
-import { UserLocalDataSourceRdb } from './UserLocalDataSourceRdb';
+import { UserLocalDataSourceRdbImpl } from './UserLocalDataSourceRdbImpl';
 import { LocalUser, LocalUserImpl, SyncStatus } from '../../domain/models/User';
 import { ILogger } from '../../core/di/interfaces';
 import { Logger } from '../../core/logging/Logger';

@@ -46,7 +46,7 @@ const ALL_USER_COLUMNS: string[] = [
  * RelationalStore-based User Local Data Source
  */
 @injectable()
-export class UserLocalDataSourceRdb implements IUserLocalDataSource {
+export class UserLocalDataSourceRdbImpl implements IUserLocalDataSource {
   private context: common.UIAbilityContext;
   private dbManager: RdbStoreManager;
   private logger?: ILogger;

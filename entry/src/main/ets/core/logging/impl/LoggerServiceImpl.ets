@@ -12,7 +12,7 @@ import { LogLevel } from './Logger';
  * Injectable logger service implementation
  */
 @injectable()
-export class LoggerService implements ILogger {
+export class LoggerServiceImpl implements ILogger {
   private readonly DOMAIN = 0x0001;
   private currentLevel: LogLevel = LogLevel.DEBUG;
   private isEnabled: boolean = true;
