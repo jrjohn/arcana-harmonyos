@@ -78,6 +78,36 @@ pipeline {
                 }
             }
         }
+        stage("Arch Qube Metrics") {
+            steps {
+                dir("${env.PROJECTS_DIR}/arcana-harmonyos") {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                        sh '''
+                            if [ -f arch-qube-reports/arch-qube.json ]; then
+                                python3 -c '
+import json
+d=json.load(open("arch-qube-reports/arch-qube.json"))
+s=d["score"]["total"];v=d["summary"]["total_violations"]
+p=1 if d["score"]["pass"] else 0;fw=d["meta"]["framework"]
+proj="arcana-harmonyos"
+m=""
+m+="arch_qube_score{project=\\"%s\\",framework=\\"%s\\"} %s\\n" % (proj,fw,s)
+m+="arch_qube_violations{project=\\"%s\\",framework=\\"%s\\"} %s\\n" % (proj,fw,v)
+m+="arch_qube_passed{project=\\"%s\\",framework=\\"%s\\"} %s\\n" % (proj,fw,p)
+for r in d["rules"]:
+    m+="arch_qube_rule_compliance{project=\\"%s\\",rule=\\"%s\\"} %s\\n" % (proj,r["id"],r["compliance"])
+open("/tmp/aq.txt","w").write(m)
+'
+                                docker run --rm --network devops_default \
+                                    -v /tmp/aq.txt:/m.txt curlimages/curl:latest \
+                                    -s -X POST --data-binary @/m.txt \
+                                    http://pushgateway:9091/metrics/job/arch_qube/project/arcana-harmonyos || true
+                            fi
+                        '''
+                    }
+                }
+            }
+        }
     }
     post {
         success { echo "HarmonyOS Jest+SonarQube OK" }
