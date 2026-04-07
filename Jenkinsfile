@@ -69,7 +69,7 @@ pipeline {
                                 --network devops_default \
                                 -v \$(pwd):/project \
                                 -v \$(pwd)/arch-qube-reports:/output \
-                                arch-qube:latest scan /project \
+                                arcana.boo/arcana/arch-qube:latest scan /project \
                                 --framework harmonyos --no-ai \
                                 --ci --format json,markdown \
                                 -o /output --threshold 90
