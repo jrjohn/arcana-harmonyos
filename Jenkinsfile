@@ -70,21 +70,18 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     withSonarQubeEnv('SonarQube') {
-                        script {
-                            def prArgs = env.CHANGE_ID ? """ \
-                                -Dsonar.pullrequest.key=${env.CHANGE_ID} \
-                                -Dsonar.pullrequest.branch=${env.BRANCH_NAME} \
-                                -Dsonar.pullrequest.base=${env.CHANGE_TARGET}""" : ''
-                            sh """sonar-scanner \
-                                -Dsonar.projectKey=harmonyos-app \
-                                -Dsonar.projectName="HarmonyOS App" \
-                                -Dsonar.sources=entry/src/main/ets \
-                                -Dsonar.inclusions="entry/src/main/ets/domain/**/*.ets,entry/src/main/ets/data/cache/LruCache.ets,entry/src/main/ets/data/api/ApiConfig.ets,entry/src/main/ets/data/api/dto/UserDto.ets" \
-                                -Dsonar.exclusions="**/node_modules/**,**/oh_modules/**,**/build/**,**/coverage/**" \
-                                -Dsonar.coverage.exclusions="**/domain/repository/impl/**,**/domain/services/impl/**" \
-                                -Dsonar.javascript.lcov.reportPaths=coverage/jest/lcov.info \
-                                -Dsonar.scm.disabled=true${prArgs}"""
-                        }
+                        // SonarQube Community Build rejects sonar.pullrequest.*
+                        // (Developer Edition feature), so PR builds run a plain scan
+                        // without GitHub PR decoration.
+                        sh """sonar-scanner \
+                            -Dsonar.projectKey=harmonyos-app \
+                            -Dsonar.projectName="HarmonyOS App" \
+                            -Dsonar.sources=entry/src/main/ets \
+                            -Dsonar.inclusions="entry/src/main/ets/domain/**/*.ets,entry/src/main/ets/data/cache/LruCache.ets,entry/src/main/ets/data/api/ApiConfig.ets,entry/src/main/ets/data/api/dto/UserDto.ets" \
+                            -Dsonar.exclusions="**/node_modules/**,**/oh_modules/**,**/build/**,**/coverage/**" \
+                            -Dsonar.coverage.exclusions="**/domain/repository/impl/**,**/domain/services/impl/**" \
+                            -Dsonar.javascript.lcov.reportPaths=coverage/jest/lcov.info \
+                            -Dsonar.scm.disabled=true"""
                     }
                 }
             }
