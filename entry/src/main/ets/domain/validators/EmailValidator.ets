@@ -275,6 +275,18 @@ export class EmailValidator {
       return result;
     }
 
+    // Per-label validation (RFC 1035): each label must be non-empty and must not
+    // start or end with a hyphen. Catches cases like "example-.com" that the whole-
+    // domain start/end checks miss, so they report INVALID_DOMAIN rather than a
+    // generic INVALID_FORMAT from the final regex.
+    const labels = domainPart.split('.');
+    for (const label of labels) {
+      if (label.length === 0 || label.startsWith('-') || label.endsWith('-')) {
+        const result: DomainPartValidationResult = { isValid: false, error: EmailValidationError.INVALID_DOMAIN };
+        return result;
+      }
+    }
+
     const validResult: DomainPartValidationResult = { isValid: true, error: undefined };
     return validResult;
   }
