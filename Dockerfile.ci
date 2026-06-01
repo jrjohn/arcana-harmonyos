@@ -3,7 +3,7 @@
 # OHOS SDK 6.0.0.858 / JDK 17
 # SDK baked into image (no host mount needed)
 # ============================================
-FROM ubuntu:22.04
+FROM ubuntu:26.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV OHOS_SDK_HOME=/opt/ohos-sdk/command-line-tools/sdk
