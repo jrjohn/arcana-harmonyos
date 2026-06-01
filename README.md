@@ -2,7 +2,7 @@
 
 <!-- agent-managed badges START -->
 [![Quality Gate](https://img.shields.io/badge/Quality_Gate-OK-brightgreen)](https://arcana.boo/sonarqube/dashboard?id=harmonyos-app)
-[![Build](https://arcana.boo/jenkins/buildStatus/icon?job=harmonyos-app-pipeline-mb%2Fmain)](https://arcana.boo/jenkins/job/harmonyos-app-pipeline-mb/job/main/)
+[![Build](https://img.shields.io/badge/Build-building-blue)](https://arcana.boo/jenkins/job/harmonyos-app-pipeline-mb/job/main/)
 **Rank**: Quality Gate `OK` · Build `SUCCESS` · Sonar coverage `86.9%`
 <!-- agent-managed badges END -->
 <!-- arch-rank START -->
