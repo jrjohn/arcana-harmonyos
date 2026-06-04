@@ -42,7 +42,6 @@ pipeline {
             steps {
                 sh '''
                     # Remove dangling/unused images to free disk space
-                    docker image prune -f || true
                     # Keep only last 3 build-tagged images for this app
                     docker images --format '{{.Repository}}:{{.Tag}}' \
                         | grep "${APP_NAME}.*build-" \
@@ -129,20 +128,20 @@ pipeline {
                 // workspace into the container via docker cp instead, and gate on the
                 // scan exit code (threshold 90).
                 sh '''
-                    docker rm -f arcana-arch-qube-harmonyos 2>/dev/null || true
-                    docker create --name arcana-arch-qube-harmonyos --network devops_default \
+                    docker rm -f arcana-arch-qube-harmonyos-${BUILD_NUMBER} 2>/dev/null || true
+                    docker create --name arcana-arch-qube-harmonyos-${BUILD_NUMBER} --network devops_default \
                         -v /src -v /output \
                         arcana.boo/arcana/arch-qube:latest \
                         scan /src --framework harmonyos --no-ai --ci \
                         --format json,markdown -o /output --threshold 90 || exit 1
                     tar --exclude=./.git --exclude=./node_modules --exclude=./oh_modules \
                         --exclude=./coverage --exclude=./build --exclude=./arch-qube-reports \
-                        -C . -cf - . | docker cp - arcana-arch-qube-harmonyos:/src || exit 1
-                    docker start -a arcana-arch-qube-harmonyos
+                        -C . -cf - . | docker cp - arcana-arch-qube-harmonyos-${BUILD_NUMBER}:/src || exit 1
+                    docker start -a arcana-arch-qube-harmonyos-${BUILD_NUMBER}
                     AQ_RC=$?
                     mkdir -p arch-qube-reports
-                    docker cp arcana-arch-qube-harmonyos:/output/. arch-qube-reports/ 2>/dev/null || true
-                    docker rm -f arcana-arch-qube-harmonyos 2>/dev/null || true
+                    docker cp arcana-arch-qube-harmonyos-${BUILD_NUMBER}:/output/. arch-qube-reports/ 2>/dev/null || true
+                    docker rm -f arcana-arch-qube-harmonyos-${BUILD_NUMBER} 2>/dev/null || true
                     exit $AQ_RC
                 '''
             }
