@@ -403,7 +403,7 @@ const bucket: ValuesBucket = {
 | **Language** | ArkTS (TypeScript-based) |
 | **UI Framework** | ArkUI (Declarative) |
 | **Architecture** | Clean Architecture + MVVM |
-| **SDK Target** | API 21 (HarmonyOS 6.0.1) |
+| **SDK Target** | API 12 (HarmonyOS 5.0.0) |
 | **SDK Minimum** | API 12 (HarmonyOS 5.0.0) |
 
 </td>
@@ -754,7 +754,7 @@ Coverage Target: 100%
 ### Prerequisites
 
 - **DevEco Studio**: 6.0.1.260 or later
-- **HarmonyOS SDK**: API 21 (6.0.1) - Target
+- **HarmonyOS SDK**: API 12 (5.0.0) - Target
 - **Minimum SDK**: API 12 (5.0.0) - Compatible
 - **Device**: HarmonyOS NEXT compatible device or emulator
 
