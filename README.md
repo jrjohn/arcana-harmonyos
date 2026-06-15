@@ -3,6 +3,7 @@
 <div align="center">
 
 ![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT%205.0-blue?style=for-the-badge&logo=huawei&logoColor=white)
+![API](https://img.shields.io/badge/API-12%20(5.0.0)-blue?style=for-the-badge)
 ![ArkTS](https://img.shields.io/badge/ArkTS-Strict%20Mode-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-purple?style=for-the-badge)
 ![Grade](https://img.shields.io/badge/Grade-A+-brightgreen?style=for-the-badge)
@@ -753,7 +754,7 @@ Coverage Target: 100%
 
 ### Prerequisites
 
-- **DevEco Studio**: 6.0.1.260 or later
+- **DevEco Studio**: 6.0.2.642 or later
 - **HarmonyOS SDK**: API 12 (5.0.0) - Target
 - **Minimum SDK**: API 12 (5.0.0) - Compatible
 - **Device**: HarmonyOS NEXT compatible device or emulator
