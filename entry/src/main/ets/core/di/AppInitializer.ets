@@ -5,7 +5,7 @@
  */
 
 import { common } from '@kit.AbilityKit';
-import { AppContainer } from './AppContainer';
+import { AppContainer, getContainer } from './AppContainer';
 
 import { IUserRepositoryService, ISyncManager, IAnalyticsService } from './interfaces';
 import { Logger } from '../logging/Logger';

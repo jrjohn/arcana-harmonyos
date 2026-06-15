@@ -2,8 +2,8 @@
 
 <div align="center">
 
-![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT%205.0-blue?style=for-the-badge&logo=huawei&logoColor=white)
-![API](https://img.shields.io/badge/API-12%20(5.0.0)-blue?style=for-the-badge)
+![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT%206.0-blue?style=for-the-badge&logo=huawei&logoColor=white)
+![API](https://img.shields.io/badge/API-22%20(6.0.2)-blue?style=for-the-badge)
 ![ArkTS](https://img.shields.io/badge/ArkTS-Strict%20Mode-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-purple?style=for-the-badge)
 ![Grade](https://img.shields.io/badge/Grade-A+-brightgreen?style=for-the-badge)
@@ -36,7 +36,7 @@
 
 ## Overview
 
-Arcana HarmonyOS is an **enterprise-grade reference implementation** showcasing modern HarmonyOS 5 (NEXT) development with **Clean Architecture**, **Offline-First design**, and **ArkTS strict mode** best practices. This is a port of the acclaimed [Arcana Android](https://github.com/jrjohn/arcana-android) application, maintaining architectural parity while leveraging HarmonyOS-native capabilities.
+Arcana HarmonyOS is an **enterprise-grade reference implementation** showcasing modern HarmonyOS 6 (NEXT) development with **Clean Architecture**, **Offline-First design**, and **ArkTS strict mode** best practices. This is a port of the acclaimed [Arcana Android](https://github.com/jrjohn/arcana-android) application, maintaining architectural parity while leveraging HarmonyOS-native capabilities.
 
 ### Three Pillars
 
@@ -404,8 +404,8 @@ const bucket: ValuesBucket = {
 | **Language** | ArkTS (TypeScript-based) |
 | **UI Framework** | ArkUI (Declarative) |
 | **Architecture** | Clean Architecture + MVVM |
-| **SDK Target** | API 12 (HarmonyOS 5.0.0) |
-| **SDK Minimum** | API 12 (HarmonyOS 5.0.0) |
+| **SDK Target** | API 22 (HarmonyOS 6.0.2) |
+| **SDK Minimum** | API 22 (HarmonyOS 6.0.2) |
 
 </td>
 <td width="50%">
@@ -755,8 +755,8 @@ Coverage Target: 100%
 ### Prerequisites
 
 - **DevEco Studio**: 6.0.2.642 or later
-- **HarmonyOS SDK**: API 12 (5.0.0) - Target
-- **Minimum SDK**: API 12 (5.0.0) - Compatible
+- **HarmonyOS SDK**: API 22 (6.0.2) - Target
+- **Minimum SDK**: API 22 (6.0.2) - Compatible
 - **Device**: HarmonyOS NEXT compatible device or emulator
 
 ### Quick Start
