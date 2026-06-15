@@ -7,8 +7,8 @@
 ![ArkTS](https://img.shields.io/badge/ArkTS-Strict%20Mode-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-purple?style=for-the-badge)
 ![Grade](https://img.shields.io/badge/Grade-A+-brightgreen?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-555%2B%20Passing-success?style=for-the-badge)
-![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-373%20passing-success?style=for-the-badge)
+![Coverage](https://img.shields.io/badge/Coverage-86.9%25-brightgreen?style=for-the-badge)
 
 **Production-Grade HarmonyOS NEXT Application**
 
