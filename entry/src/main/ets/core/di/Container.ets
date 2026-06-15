@@ -313,7 +313,7 @@ export class Container implements IContainer {
   private getBinding<T>(identifier: ServiceIdentifier<T>): Binding<T> | undefined {
     const bindings = this.bindings.get(identifier);
     if (bindings && bindings.length > 0) {
-      return bindings.at(-1) as Binding<T>; // Return last binding (allows override)
+      return bindings[bindings.length - 1] as Binding<T>; // Return last binding (allows override)
     }
     return undefined;
   }

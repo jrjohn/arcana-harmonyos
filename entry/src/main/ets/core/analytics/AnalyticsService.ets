@@ -350,7 +350,7 @@ export class AnalyticsService implements IAnalyticsService {
    * Generates a unique session ID
    */
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 9) // NOSONAR javascript:S2245}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`; // NOSONAR javascript:S2245
   }
 
   /**

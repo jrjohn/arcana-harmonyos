@@ -13,7 +13,7 @@ import { Result } from '../../domain/models/Result';
 import { AppError } from '../../domain/models/AppError';
 import { ValueUnsubscribe } from '../../data/cache/ObservableCache';
 
-export type { AnalyticsProps } from '../analytics/AnalyticsService';
+export { AnalyticsProps } from '../analytics/AnalyticsService';
 
 // ===== Network Monitor Interface =====
 
