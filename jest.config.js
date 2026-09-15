@@ -5,11 +5,19 @@ module.exports = {
   // Standard extensions (.ets files are pre-copied to .ts before test run)
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
 
-  // ts-jest handles .ts files (which are .ets copies made before test run)
+  // @swc/jest handles .ts files (which are .ets copies made before test run).
+  // Transpile-only (matches the prior ts-jest diagnostics:false setup — no
+  // type-checking happened during tests either way) and untied to the
+  // `typescript` package version, so it isn't blocked by ts-jest's lack of
+  // TypeScript 7 compiler-API support.
   transform: {
-    '\\.ts$': ['ts-jest', {
-      tsconfig: 'tsconfig.jest.json',
-      diagnostics: false,
+    '\\.ts$': ['@swc/jest', {
+      jsc: {
+        parser: { syntax: 'typescript', decorators: true },
+        transform: { legacyDecorator: true, decoratorMetadata: true },
+        target: 'es2020',
+      },
+      module: { type: 'commonjs' },
     }],
   },
 
