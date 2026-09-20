@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.1...v1.1.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* **deps:** update jest monorepo to v30.5.2 ([#17](https://github.com/jrjohn/arcana-harmonyos/issues/17)) ([d0db730](https://github.com/jrjohn/arcana-harmonyos/commit/d0db73090f5011a0073b555f027664e2bf6e2209))
+
 ## [1.1.1](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.0...v1.1.1) (2026-09-15)
 
 
