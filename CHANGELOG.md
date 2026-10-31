@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.7](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.6...v1.1.7) (2026-10-31)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @swc/core to v1.16.21 ([#28](https://github.com/jrjohn/arcana-harmonyos/issues/28)) ([1ffa68f](https://github.com/jrjohn/arcana-harmonyos/commit/1ffa68f16f0d0918f9c00d6f80da9a2ca603b4b6))
+
 ## [1.1.6](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.5...v1.1.6) (2026-10-22)
 
 
