@@ -4,8 +4,8 @@
 
 [![Architecture Rating](https://img.shields.io/badge/Architecture%20Rating-⭐⭐⭐⭐⭐%209.2%2F10-gold?style=for-the-badge)](#-architecture-evaluation)
 
-![HarmonyOS](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/jrjohn/arcana-harmonyos/main/build-profile.json5&query=%24.app.products%5B0%5D.compatibleSdkVersion&label=HarmonyOS&prefix=NEXT%20&color=blue&style=for-the-badge&logo=huawei&logoColor=white)
-![API](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/jrjohn/arcana-harmonyos/main/build-profile.json5&query=%24.app.products%5B0%5D.compatibleSdkVersion&label=API&color=blue&style=for-the-badge)
+![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT%206.0.2%2822%29-blue?style=for-the-badge&logo=huawei&logoColor=white)
+![API](https://img.shields.io/badge/API-6.0.2%2822%29-blue?style=for-the-badge)
 ![ArkTS](https://img.shields.io/badge/ArkTS-Strict%20Mode-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-purple?style=for-the-badge)
 ![Grade](https://img.shields.io/badge/Grade-A+-brightgreen?style=for-the-badge)
