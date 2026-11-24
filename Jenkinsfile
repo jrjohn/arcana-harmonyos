@@ -54,30 +54,12 @@ pipeline {
 
         stage('Jest Coverage') {
             steps {
-                sh 'npm install --no-fund --no-audit 2>&1 | tail -3'
-                // A failing test now fails the build (real gate). RC is captured so the
-                // lcov patch + .ts cleanup still run, then we exit with the test result.
-                sh '''
-                    set +e
-                    # Copy .ets → .ts so ts-jest can handle them natively
-                    find entry/src/main/ets -name "*.ets" | while read f; do
-                        cp "$f" "${f%.ets}.ts"
-                    done
-                    find entry/src/ohosTest/ets/test -name "*.ets" | while read f; do
-                        cp "$f" "${f%.ets}.ts"
-                    done
-                    npm run test:coverage -- --forceExit
-                    RC=$?
-                    # Patch lcov: .ts paths → .ets so SonarQube matches source files
-                    if [ -f coverage/jest/lcov.info ]; then
-                        sed -i "s|\\.ts$|.ets|g; s|\\.ts:|.ets:|g" coverage/jest/lcov.info
-                    fi
-                    # Remove .ts copies BEFORE SonarQube scan to avoid language detection
-                    # conflicts (.ts files conflict with sonar's JS+TS matchers for .ets).
-                    find entry/src/main/ets -name "*.ts" -delete
-                    find entry/src/ohosTest/ets/test -name "*.ts" -delete
-                    exit $RC
-                '''
+                // No `| tail`: Jenkins sh has no pipefail, so a failed install exited 0 through the pipe.
+                sh 'npm install --no-fund --no-audit'
+                // A failing test fails the build: tools/run-jest.sh copies .ets → .ts, runs jest,
+                // patches lcov back to .ets for Sonar, removes the copies, and exits with jest's code.
+                // Same script agents run locally (AGENTS.md §5).
+                sh 'bash tools/run-jest.sh'
             }
         }
 
@@ -128,6 +110,18 @@ pipeline {
                 // workspace into the container via docker cp instead, and gate on the
                 // scan exit code (threshold 90).
                 sh '''
+                    mkdir -p arch-qube-reports
+                    # Version pinned in tools/arch-qube.version (shared with tools/arch-check.sh).
+                    # ghcr.io first (public, multi-arch), then arcana.boo. Never :latest — a silent
+                    # fallback to latest already broke another template's CI when latest moved.
+                    V="$(tr -d '[:space:]' < tools/arch-qube.version)"
+                    IMG=""
+                    for cand in "ghcr.io/jrjohn/arch-qube:$V" "arcana.boo/arcana/arch-qube:$V"; do
+                        if docker image inspect "$cand" >/dev/null 2>&1 || docker pull -q "$cand" >/dev/null 2>&1; then
+                            IMG="$cand"; break
+                        fi
+                    done
+                    [ -n "$IMG" ] || { echo "arch-qube $V image unavailable (ghcr.io, arcana.boo) — NOT a pass"; exit 2; }
                     # Branch in the name: BUILD_NUMBER restarts at 1 on every branch, so two branches building
                     # at once used the same name and one's `docker rm -f` deleted the other's container
                     # (arcana-ios PR-14/PR-15, 2026-09-30: "destination ...:/src must be a directory").
@@ -135,15 +129,19 @@ pipeline {
                     docker rm -f "$AQ" 2>/dev/null || true
                     docker create --name "$AQ" --network devops_default \
                         -v /src -v /output \
-                        arcana.boo/arcana/arch-qube:latest \
+                        "$IMG" \
                         scan /src --framework harmonyos --no-ai --ci \
                         --format json,markdown -o /output --threshold 90 || exit 1
                     tar --exclude=./.git --exclude=./node_modules --exclude=./oh_modules \
-                        --exclude=./coverage --exclude=./build --exclude=./arch-qube-reports \
+                        --exclude=./coverage --exclude=./build --exclude=./entry/build --exclude=./.hvigor \
+                        --exclude=./arch-qube-reports \
                         -C . -cf - . | docker cp - "$AQ":/src || exit 1
+                    # set +e: Jenkins runs sh -e, so a failing scan aborted here before the report
+                    # was copied out; the scan's rc is still the stage result below.
+                    set +e
                     docker start -a "$AQ"
                     AQ_RC=$?
-                    mkdir -p arch-qube-reports
+                    set -e
                     docker cp "$AQ":/output/. arch-qube-reports/ 2>/dev/null || true
                     docker rm -f "$AQ" 2>/dev/null || true
                     exit $AQ_RC
