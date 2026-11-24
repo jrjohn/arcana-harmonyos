@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.8...v1.2.0) (2026-11-24)
+
+
+### Features
+
+* AGENTS.md + scaffolding + layering hook for AI agents ([#33](https://github.com/jrjohn/arcana-harmonyos/issues/33)) ([4830aca](https://github.com/jrjohn/arcana-harmonyos/commit/4830aca5a5eace8c3756170a7a882347e7f85e80))
+
 ## [1.1.8](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.7...v1.1.8) (2026-11-05)
 
 
