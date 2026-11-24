@@ -37,3 +37,6 @@ Thumbs.db
 
 # Generated files
 /entry/src/main/resources/rawfile/
+
+# arch-qube report (tools/arch-check.sh)
+/arch-qube-reports/

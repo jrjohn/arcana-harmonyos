@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Fast layering check on every commit (no docker, no SDK). The full scan is
+# tools/arch-check.sh and the Jenkins stage "Architecture Qube". Rules: AGENTS.md §3.
+#
+# Regex, not `case` globs: in a case pattern `*` also matches `/`, so `ets/*.ets` would match
+# every correctly layered file too (this exact bug false-blocked good files in another
+# template). Only ADDED files / ADDED lines are judged, so legacy code never blocks an edit.
+set -euo pipefail
+
+E='entry/src/main/ets'
+# Where a NEW .ets/.ts file may live (AGENTS.md §2). One alternative per layer.
+LAYER_RE="^${E}/("
+LAYER_RE+='entryability|workers|pages'
+LAYER_RE+='|core/[a-z0-9]+(/impl)?'
+LAYER_RE+='|domain/(models|repository|validators|services|services/impl)'
+LAYER_RE+='|data/(api|api/dto|api/impl|cache|local|local/impl|repository)'
+LAYER_RE+='|presentation/(viewmodel|components)'
+LAYER_RE+=')/[A-Za-z0-9_.-]+\.ets$'
+OTHER_OK_RE='^(entry/src/ohosTest/.+|jest-tests/[A-Za-z0-9_-]+\.test\.ts|(entry/)?hvigorfile\.ts)$'
+
+DI_RE="^${E}/core/di/"
+TEST_RE='^(entry/src/ohosTest/|jest-tests/)'
+# A concrete implementation class: XxxServiceImpl, XxxRepositoryImpl, XxxDataSourceImpl, ...
+# (model helpers such as UserImpl / LocalUserImpl are value classes, not DI implementations).
+IMPL_RE="(from ['\"][^'\"]*/impl/|\\b[A-Z][A-Za-z0-9]*(Service|Repository|DataSource|DataSourceRdb|Api|Manager|Monitor|Storage|Scheduler|Store)Impl\\b)"
+
+fail=0
+
+# R8 — no NEW source file outside the layer directories.
+while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    [[ "$f" =~ \.(ets|ts)$ ]] || continue
+    if ! [[ "$f" =~ $LAYER_RE || "$f" =~ $OTHER_OK_RE ]]; then
+        echo "pre-commit: $f — not in a layer directory (AGENTS.md §2). Use tools/new-feature.sh or move it into a layer." >&2
+        fail=1
+    fi
+done <<< "$(git diff --cached --name-only --diff-filter=AR)"
+
+# R2 / R3 — on ADDED import / new lines only:
+#   * only core/di/ (and tests) may import an impl/ path or a concrete *Impl, or `new` one;
+#   * pages/ and presentation/ must not import the data layer.
+while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    [[ "$f" =~ ^${E}/.*\.ets$ ]] || continue
+    [[ "$f" =~ $TEST_RE || "$f" =~ $DI_RE ]] && continue
+    added="$(git diff --cached -U0 -- "$f" | grep -E '^\+[^+]' | sed 's/^+//' | grep -E '^[[:space:]]*import\b|\bnew [A-Z]' || true)"
+    [ -n "$added" ] || continue
+    hits="$(printf '%s\n' "$added" | grep -E "$IMPL_RE" || true)"
+    if [ -n "$hits" ]; then
+        echo "pre-commit: $f imports or constructs a concrete *Impl — only ${E}/core/di/ (AppContainer.ets) may (AGENTS.md R2):" >&2
+        printf '    %s\n' "$hits" >&2
+        fail=1
+    fi
+    if [[ "$f" =~ ^${E}/(pages|presentation)/ ]]; then
+        hits="$(printf '%s\n' "$added" | grep -E "from ['\"](\\.\\./)+data/" || true)"
+        if [ -n "$hits" ]; then
+            echo "pre-commit: $f imports the data layer — pages/ViewModels use domain service interfaces from AppContainer (AGENTS.md R3):" >&2
+            printf '    %s\n' "$hits" >&2
+            fail=1
+        fi
+    fi
+done <<< "$(git diff --cached --name-only --diff-filter=ACMR)"
+
+if [ "$fail" -ne 0 ]; then
+    echo "pre-commit: blocked. Full check: tools/arch-check.sh" >&2
+    exit 1
+fi
