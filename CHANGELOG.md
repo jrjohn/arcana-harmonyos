@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/jrjohn/arcana-harmonyos/compare/v1.2.0...v1.3.0) (2026-11-25)
+
+
+### Features
+
+* enforce arch-check locally (Claude Code Stop hook + pre-push) ([#37](https://github.com/jrjohn/arcana-harmonyos/issues/37)) ([94dc125](https://github.com/jrjohn/arcana-harmonyos/commit/94dc125ee3d06df03075cab1e98468e62fe49769))
+
 ## [1.2.0](https://github.com/jrjohn/arcana-harmonyos/compare/v1.1.8...v1.2.0) (2026-11-24)
 
 
