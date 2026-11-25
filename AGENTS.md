@@ -83,13 +83,13 @@ https://github.com/jrjohn/arcana-skills/tree/main/arch-qube-skill. The version i
   `--framework harmonyos`, `--threshold 90` and exclusions as Jenkins stage "Architecture Qube".
   Exit 0 = pass, 1 = fail, 2 = could not run (no Docker / no image) — 2 is **not** a pass.
 - Without Docker, on a tree without `node_modules/`, `oh_modules/`, `build/`, `coverage/`:
-  `pipx run --spec git+https://github.com/jrjohn/arcana-arch-qube.git@v0.5.6 arch-qube scan . --framework harmonyos --no-ai --format json,markdown -o arch-qube-reports --threshold 90`.
+  `pipx run --spec git+https://github.com/jrjohn/arcana-arch-qube.git@v0.5.7 arch-qube scan . --framework harmonyos --no-ai --format json,markdown -o arch-qube-reports --threshold 90`.
 - Report: `arch-qube-reports/arch-qube.md` (summary) and `arch-qube.json` (per rule:
   `files_checked`, violations). PASS needs score ≥ threshold **and** zero violations in
   every critical rule — a 99.4 can FAIL. A rule under "Not evaluated" (here: MVVM I/O/E
   Structure + Models, 4-Layer Cache, Offline-First, Security, Module Boundary — AI-only) is not
   a pass; R4/R7 are on you. A rule with `files_checked: 0` checked nothing. "Only DI Container
-  Imports Impl" (arch-qube 0.5.6, `harmonyos` profile) treats all of `data/` and `core/` as
+  Imports Impl" (arch-qube 0.5.7, `harmonyos` profile) treats all of `data/` and `core/` as
   container scope: an `*Impl` import there is not reported (measured: `core/sync/` and
   `data/repository/` importing an impl scored 100 on that rule; `domain/` and `pages/` were
   caught). R2 still applies there — the pre-commit hook enforces it. `--ci` prints nothing on failure: rerun without `--ci`.
