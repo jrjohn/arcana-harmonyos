@@ -91,10 +91,9 @@ https://github.com/jrjohn/arcana-skills/tree/main/arch-qube-skill. The version i
   every critical rule — a 99.4 can FAIL. A rule under "Not evaluated" (here: MVVM I/O/E
   Structure + Models, 4-Layer Cache, Offline-First, Security, Module Boundary — AI-only) is not
   a pass; R4/R7 are on you. A rule with `files_checked: 0` checked nothing. "Only DI Container
-  Imports Impl" (`harmonyos` profile, measured on arch-qube 0.5.6) treats all of `data/` and `core/` as
-  container scope: an `*Impl` import there is not reported (measured: `core/sync/` and
-  `data/repository/` importing an impl scored 100 on that rule; `domain/` and `pages/` were
-  caught). R2 still applies there — the pre-commit hook enforces it. `--ci` prints nothing on failure: rerun without `--ci`.
+  Imports Impl" treats only `core/di/` (and `DataMigration`) as the composition root, so an
+  `*Impl` import anywhere else — including `core/` and `data/` — is reported; the pre-commit
+  hook enforces R2 as well. `--ci` prints nothing on failure: rerun without `--ci`.
 - False positive: open an issue on arcana-arch-qube with the report attached. Never lower
   `--threshold`, add exclusions, or move code to dodge a rule.
 
