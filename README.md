@@ -2,15 +2,15 @@
 
 <div align="center">
 
-[![Architecture Rating](https://img.shields.io/badge/Architecture%20Rating-⭐⭐⭐⭐⭐%209.2%2F10-gold?style=for-the-badge)](#-architecture-evaluation)
+[![Architecture Rating](.github/badges/architecture-rating-9-2-10-gold-f95e8b75.svg)](#-architecture-evaluation)
 
-![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT%206.0.2%2822%29-blue?style=for-the-badge&logo=huawei&logoColor=white)
-![API](https://img.shields.io/badge/API-6.0.2%2822%29-blue?style=for-the-badge)
-![ArkTS](https://img.shields.io/badge/ArkTS-Strict%20Mode-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-purple?style=for-the-badge)
-![Grade](https://img.shields.io/badge/Grade-A+-brightgreen?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-373%20passing-success?style=for-the-badge)
-![Coverage](https://img.shields.io/badge/Coverage-86.9%25-brightgreen?style=for-the-badge)
+![HarmonyOS](.github/badges/harmonyos-next-6-0-2-22-blue-0e78d052.svg)
+![API](.github/badges/api-6-0-2-22-blue-d53d81f1.svg)
+![ArkTS](.github/badges/arkts-strict-mode-3178c6-f48e447b.svg)
+![Architecture](.github/badges/architecture-clean-mvvm-purple-f2d3577d.svg)
+![Grade](.github/badges/grade-a-brightgreen-0ed2c7a2.svg)
+![Tests](.github/badges/tests-373-passing-success-d38e5ef6.svg)
+![Coverage](.github/badges/coverage-86-9-brightgreen-e3a8efae.svg)
 
 **Production-Grade HarmonyOS NEXT Application**
 
@@ -22,15 +22,15 @@
 
 <!-- agent-managed badges START -->
 <p align="center">
-  <a href="https://arcana.boo/sonarqube/dashboard?id=harmonyos-app"><img src="https://img.shields.io/badge/Quality_Gate-OK-brightgreen?style=for-the-badge" alt="Quality Gate"></a>
-  <a href="https://arcana.boo/jenkins/job/harmonyos-app-pipeline-mb/job/main/"><img src="https://img.shields.io/badge/Build-passing-brightgreen?style=for-the-badge" alt="Build"></a>
+  <a href="https://arcana.boo/sonarqube/dashboard?id=harmonyos-app"><img src=".github/badges/quality-gate-ok-brightgreen-7365c32e.svg" alt="Quality Gate"></a>
+  <a href="https://arcana.boo/jenkins/job/harmonyos-app-pipeline-mb/job/main/"><img src=".github/badges/build-passing-brightgreen-f2a434e1.svg" alt="Build"></a>
 </p>
 <!-- agent-managed badges END -->
 <!-- arch-rank START -->
 <p align="center">
-  <img src="https://img.shields.io/badge/arch--qube-100.0%2F100-blue?style=for-the-badge" alt="arch-qube">
-  <img src="https://img.shields.io/badge/Grade-A%2B-brightgreen?style=for-the-badge" alt="Grade">
-  <img src="https://img.shields.io/badge/Arch_Gate-PASS-brightgreen?style=for-the-badge" alt="Architecture Gate">
+  <img src=".github/badges/arch-qube-100-0-100-blue-61d09e06.svg" alt="arch-qube">
+  <img src=".github/badges/grade-a-brightgreen-1f1e6c73.svg" alt="Grade">
+  <img src=".github/badges/arch-gate-pass-brightgreen-887cab17.svg" alt="Architecture Gate">
 </p>
 <!-- arch-rank END -->
 
@@ -884,7 +884,7 @@ Based on [Arcana Android](https://github.com/jrjohn/arcana-android) architecture
 
 **Built with Clean Architecture principles for HarmonyOS NEXT**
 
-![Grade](https://img.shields.io/badge/Overall%20Grade-A%2B-brightgreen?style=for-the-badge)
-![Production](https://img.shields.io/badge/Status-Production%20Ready-blue?style=for-the-badge)
+![Grade](.github/badges/overall-grade-a-brightgreen-be266513.svg)
+![Production](.github/badges/status-production-ready-blue-40104d02.svg)
 
 </div>
